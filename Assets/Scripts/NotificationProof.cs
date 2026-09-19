@@ -1,5 +1,8 @@
 using System;
 using System.Collections;
+using System.IO;
+using System.Linq;
+using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -13,7 +16,9 @@ namespace RememberThis
     public sealed class NotificationProof : MonoBehaviour
     {
         private const string Channel = "remember_this_test";
-        private const int NotificationId = 21001;
+        private ReminderStore store;
+        private string storePath;
+        private Text upcoming;
         private Text status;
         private Button schedule;
         private bool busy;
@@ -36,6 +41,19 @@ namespace RememberThis
             displayedSecond = second;
             currentClock.text = now.ToString("dddd, MMMM d, yyyy\nh:mm:ss tt",
                 System.Globalization.CultureInfo.InvariantCulture);
+            RefreshUpcoming();
+        }
+
+        private void RefreshUpcoming()
+        {
+            if (upcoming == null || store == null) return;
+            var text = new StringBuilder();
+            foreach (var reminder in store.Upcoming(DateTime.UtcNow))
+                text.AppendLine(reminder.LocalTime.ToString("MMM d, h:mm:ss tt")).AppendLine(reminder.text).AppendLine();
+            var value = text.Length == 0 ? "No upcoming reminders." : text.ToString();
+            if (upcoming.text == value) return;
+            upcoming.text = value;
+            upcoming.GetComponent<LayoutElement>().preferredHeight = -1;
         }
 
         private void UpdateChosenTime(string value)
@@ -64,6 +82,9 @@ namespace RememberThis
         private void Start()
         {
             BuildUI();
+            storePath = Path.Combine(Application.persistentDataPath, "reminders.json");
+            try { store = ReminderStore.Load(storePath); RefreshUpcoming(); }
+            catch (Exception e) { ShowError(e); schedule.interactable = false; return; }
 #if UNITY_ANDROID && !UNITY_EDITOR
             try
             {
@@ -72,6 +93,10 @@ namespace RememberThis
                     Id = Channel, Name = "Reminder tests", Importance = Importance.High,
                     Description = "Reminders at your chosen time"
                 });
+                // Stable IDs avoid duplicate alerts when reopening the app.
+                foreach (var reminder in store.Upcoming(DateTime.UtcNow))
+                    if (AndroidNotificationCenter.CheckScheduledNotificationStatus(reminder.id) == NotificationStatus.Unknown)
+                        SendReminder(reminder);
                 status.text = "Ready. Allow notifications when asked, then leave the app to test delivery.";
             }
             catch (Exception e) { ShowError(e); }
@@ -82,7 +107,7 @@ namespace RememberThis
 
         private IEnumerator Schedule()
         {
-            if (busy) yield break;
+            if (busy || store == null) yield break;
             var reminderText = reminderInput.text.Trim();
             if (string.IsNullOrWhiteSpace(reminderText))
             {
@@ -120,13 +145,7 @@ namespace RememberThis
                         status.text = "That time passed while waiting for permission. Choose a new time.";
                         yield break;
                     }
-                    AndroidNotificationCenter.CancelNotification(NotificationId);
-                    AndroidNotificationCenter.SendNotificationWithExplicitID(new AndroidNotification
-                    {
-                        Title = "Remember This",
-                        Text = reminderText,
-                        FireTime = due
-                    }, Channel, NotificationId);
+                    SaveReminder(reminderText, due);
                     status.text = "Reminder set for " + due.ToString("MMM d, h:mm:ss tt") + ".\nLeave the app and watch for the notification.\n"
                         + (AndroidNotificationCenter.UsingExactScheduling
                             ? "Exact scheduling is available. Delivery still needs a phone test."
@@ -134,6 +153,8 @@ namespace RememberThis
                 }
                 catch (Exception e) { ShowError(e); }
 #else
+                try { SaveReminder(reminderText, due); }
+                catch (Exception e) { ShowError(e); yield break; }
                 status.text = "Preview: " + reminderText + "\nFor " + due.ToString("MMM d, h:mm:ss tt") + ". No notification was scheduled on this device.";
                 yield return null;
 #endif
@@ -141,17 +162,48 @@ namespace RememberThis
             finally { busy = false; schedule.interactable = true; timeInput.interactable = true; reminderInput.interactable = true; }
         }
 
+        private void SaveReminder(string text, DateTime due)
+        {
+            var reminder = new SavedReminder { id = store.nextId, text = text, utcTicks = due.ToUniversalTime().Ticks };
+            store.nextId = checked(store.nextId + 1);
+            store.reminders.Add(reminder);
+            try { store.Save(storePath); }
+            catch { store.reminders.Remove(reminder); store.nextId--; throw; }
+#if UNITY_ANDROID && !UNITY_EDITOR
+            // Persist first: if scheduling fails, reopening can retry this saved reminder.
+            try { SendReminder(reminder); }
+            catch (Exception e) { throw new InvalidOperationException("Reminder saved, but notification scheduling failed. Reopen the app to retry.", e); }
+#endif
+            RefreshUpcoming();
+        }
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+        private static void SendReminder(SavedReminder reminder)
+        {
+            AndroidNotificationCenter.SendNotificationWithExplicitID(new AndroidNotification
+            {
+                Title = "Remember This", Text = reminder.text, FireTime = reminder.LocalTime
+            }, Channel, reminder.id);
+        }
+#endif
+
         private void Cancel()
         {
-            if (busy) return;
+            if (busy || store == null) return;
             try
             {
+                var reminder = store.reminders.OrderByDescending(r => r.id).FirstOrDefault();
+                if (reminder == null) { status.text = "No saved reminder to cancel."; return; }
+                store.reminders.Remove(reminder);
+                try { store.Save(storePath); }
+                catch { store.reminders.Add(reminder); throw; }
 #if UNITY_ANDROID && !UNITY_EDITOR
-                AndroidNotificationCenter.CancelNotification(NotificationId);
-                status.text = "Test notification canceled.";
+                AndroidNotificationCenter.CancelNotification(reminder.id);
+                status.text = "Most recently saved reminder canceled.";
 #else
-                status.text = "Preview reset. No device notification was scheduled.";
+                status.text = "Most recently saved preview reminder removed.";
 #endif
+                RefreshUpcoming();
             }
             catch (Exception e) { ShowError(e); }
         }
@@ -201,13 +253,25 @@ namespace RememberThis
             rect.offsetMin = rect.offsetMax = Vector2.zero;
             background.GetComponent<Image>().color = new Color(0.055f, 0.09f, 0.14f);
 
-            var panel = new GameObject("Safe area", typeof(RectTransform), typeof(VerticalLayoutGroup));
-            panel.transform.SetParent(background.transform, false);
-            var safe = panel.GetComponent<RectTransform>();
+            var viewport = new GameObject("Scroll viewport", typeof(RectTransform), typeof(Image), typeof(RectMask2D), typeof(ScrollRect));
+            viewport.transform.SetParent(background.transform, false);
+            viewport.GetComponent<Image>().color = new Color(0, 0, 0, 0);
+            var safe = viewport.GetComponent<RectTransform>();
             var area = Screen.safeArea;
             safe.anchorMin = new Vector2(area.xMin / Screen.width, area.yMin / Screen.height);
             safe.anchorMax = new Vector2(area.xMax / Screen.width, area.yMax / Screen.height);
             safe.offsetMin = safe.offsetMax = Vector2.zero;
+            var panel = new GameObject("Content", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
+            panel.transform.SetParent(viewport.transform, false);
+            var content = panel.GetComponent<RectTransform>();
+            content.anchorMin = new Vector2(0, 1); content.anchorMax = Vector2.one;
+            content.pivot = new Vector2(0.5f, 1);
+            content.sizeDelta = Vector2.zero;
+            panel.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            var scroll = viewport.GetComponent<ScrollRect>();
+            scroll.viewport = safe; scroll.content = content; scroll.horizontal = false;
+            scroll.movementType = ScrollRect.MovementType.Clamped;
+            scroll.scrollSensitivity = 35;
             var layout = panel.GetComponent<VerticalLayoutGroup>();
             layout.padding = new RectOffset(40, 40, 50, 40);
             layout.spacing = 12;
@@ -256,9 +320,11 @@ namespace RememberThis
             timeInput.text = initialTime.ToString("h:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
             schedule = MakeButton(panel.transform, "Set reminder", () => StartCoroutine(Schedule()));
             MakeButton(panel.transform, "Enable exact timing", RequestExactTiming);
-            MakeButton(panel.transform, "Cancel test reminder", Cancel);
+            MakeButton(panel.transform, "Cancel most recent reminder", Cancel);
             status = Label(panel.transform, "Starting...", 25, 190);
-            Label(panel.transform, "Each new reminder replaces the previous one. Keep Android running to receive it.", 22, 65);
+            Label(panel.transform, "Upcoming reminders — scroll to see all", 28, 75);
+            upcoming = Label(panel.transform, "No upcoming reminders.", 25, 65);
+            Label(panel.transform, "Reminders are saved on this device. Past times leave this list; that does not confirm delivery.", 22, 95);
         }
 
         private static InputField MakeTimeInput(Transform parent)
