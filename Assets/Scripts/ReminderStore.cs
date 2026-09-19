@@ -12,6 +12,8 @@ namespace RememberThis
         public int id;
         public string text;
         public long utcTicks;
+        public bool completed;
+        public bool deleted;
         public DateTime LocalTime => new DateTime(utcTicks, DateTimeKind.Utc).ToLocalTime();
     }
 
@@ -42,6 +44,6 @@ namespace RememberThis
         }
 
         public IEnumerable<SavedReminder> Upcoming(DateTime utcNow) =>
-            reminders.Where(r => r.utcTicks > utcNow.Ticks).OrderBy(r => r.utcTicks).ThenBy(r => r.id);
+            reminders.Where(r => !r.completed && !r.deleted && r.utcTicks > utcNow.Ticks).OrderBy(r => r.utcTicks).ThenBy(r => r.id);
     }
 }

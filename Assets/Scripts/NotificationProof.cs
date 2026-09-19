@@ -18,7 +18,13 @@ namespace RememberThis
         private const string Channel = "remember_this_test";
         private ReminderStore store;
         private string storePath;
-        private Text upcoming;
+        private Transform reminderList;
+        private ScrollRect pageScroll;
+        private int editingId;
+        private bool customSnooze;
+        private int deleteConfirmId;
+        private string listSignature;
+        private Button cancelEdit;
         private Text status;
         private Button schedule;
         private bool busy;
@@ -42,18 +48,169 @@ namespace RememberThis
             currentClock.text = now.ToString("dddd, MMMM d, yyyy\nh:mm:ss tt",
                 System.Globalization.CultureInfo.InvariantCulture);
             RefreshUpcoming();
+            HandleNotificationSnooze();
+        }
+
+        private void HandleNotificationSnooze()
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            if (store == null || busy) return;
+            using (var player = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+            using (var activity = player.GetStatic<AndroidJavaObject>("currentActivity"))
+            using (var actions = new AndroidJavaClass("com.unity.androidnotifications.ReminderNotificationActions"))
+            {
+                var token = actions.CallStatic<string>("peek", activity);
+                if (string.IsNullOrEmpty(token)) return;
+                try
+                {
+                    var parts = token.Split(':');
+                    if (parts.Length == 4 && parts[0] == "remember-snooze" &&
+                        int.TryParse(parts[1], out var id) && long.TryParse(parts[2], out var originalTicks))
+                    {
+                        var reminder = store.reminders.FirstOrDefault(r => r.id == id && !r.completed && !r.deleted && r.utcTicks == originalTicks);
+                        if (reminder != null)
+                        {
+                            if (parts[3] == "snooze") Snooze(reminder, DateTime.Now.AddMinutes(10));
+                            else if (parts[3] == "cancel") ChangeReminder(reminder, () => reminder.completed = true, "Alert canceled. Reminder completed.");
+                        }
+                    }
+                }
+                finally { actions.CallStatic("acknowledge", activity, token); }
+            }
+#endif
         }
 
         private void RefreshUpcoming()
         {
-            if (upcoming == null || store == null) return;
+            if (reminderList == null || store == null) return;
             var text = new StringBuilder();
-            foreach (var reminder in store.Upcoming(DateTime.UtcNow))
-                text.AppendLine(reminder.LocalTime.ToString("MMM d, h:mm:ss tt")).AppendLine(reminder.text).AppendLine();
-            var value = text.Length == 0 ? "No upcoming reminders." : text.ToString();
-            if (upcoming.text == value) return;
-            upcoming.text = value;
-            upcoming.GetComponent<LayoutElement>().preferredHeight = -1;
+            foreach (var r in store.reminders.Where(r => !r.deleted))
+                text.Append(r.id).Append(r.text).Append(r.utcTicks).Append(r.completed).Append(r.utcTicks <= DateTime.UtcNow.Ticks);
+            text.Append(deleteConfirmId);
+            if (listSignature == text.ToString()) return;
+            listSignature = text.ToString();
+            foreach (Transform child in reminderList) { child.gameObject.SetActive(false); Destroy(child.gameObject); }
+            foreach (var group in new[] { "Upcoming", "Past due", "Completed" })
+            {
+                Label(reminderList, group, 30, 50);
+                var items = store.reminders.Where(r => !r.deleted && (group == "Completed" ? r.completed :
+                    !r.completed && (group == "Upcoming" ? r.utcTicks > DateTime.UtcNow.Ticks : r.utcTicks <= DateTime.UtcNow.Ticks)))
+                    .OrderBy(r => r.utcTicks).ThenBy(r => r.id).ToArray();
+                if (items.Length == 0) Label(reminderList, "None", 24, 40);
+                foreach (var r in items)
+                {
+                    Label(reminderList, r.text + "\n" + r.LocalTime.ToString("MMM d, h:mm:ss tt"), 25, -1);
+                    if (!r.completed)
+                    {
+                        var row = ActionRow(reminderList);
+                        MakeButton(row, "Edit", () => BeginEdit(r));
+                        MakeButton(row, "Complete", () => ChangeReminder(r, () => r.completed = true, "Reminder completed."));
+                        Label(reminderList, "Snooze", 25, 40);
+                        var snooze = ActionRow(reminderList);
+                        MakeButton(snooze, "+10 min", () => Snooze(r, DateTime.Now.AddMinutes(10)));
+                        MakeButton(snooze, "+1 hour", () => Snooze(r, DateTime.Now.AddHours(1)));
+                        MakeButton(snooze, "Tomorrow", () => Snooze(r, DateTime.Now.AddDays(1)));
+                        MakeButton(reminderList, "Custom...", () => BeginCustomSnooze(r));
+                    }
+                    if (deleteConfirmId == r.id)
+                    {
+                        Label(reminderList, "Delete this reminder?", 25, 45);
+                        var row = ActionRow(reminderList);
+                        MakeButton(row, "Delete", () => ChangeReminder(r, () => r.deleted = true, "Reminder deleted."));
+                        MakeButton(row, "Keep", () => { deleteConfirmId = 0; RefreshUpcoming(); });
+                    }
+                    else MakeButton(reminderList, "Delete...", () => { if (busy) return; deleteConfirmId = r.id; RefreshUpcoming(); });
+                }
+            }
+        }
+
+        private static Transform ActionRow(Transform parent)
+        {
+            var row = new GameObject("Actions", typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(LayoutElement));
+            row.transform.SetParent(parent, false);
+            row.GetComponent<LayoutElement>().preferredHeight = 80;
+            row.GetComponent<HorizontalLayoutGroup>().spacing = 12;
+            row.GetComponent<HorizontalLayoutGroup>().childControlWidth = true;
+            row.GetComponent<HorizontalLayoutGroup>().childControlHeight = true;
+            return row.transform;
+        }
+
+        private void BeginEdit(SavedReminder reminder)
+        {
+            if (busy) return;
+            customSnooze = false;
+            reminderInput.interactable = true;
+            cancelEdit.GetComponentInChildren<Text>().text = "Cancel editing";
+            editingId = reminder.id;
+            reminderInput.text = reminder.text;
+            isPm = reminder.LocalTime.Hour >= 12;
+            periodLabel.text = isPm ? "PM" : "AM";
+            timeInput.SetTextWithoutNotify(reminder.LocalTime.ToString("h:mm:ss", System.Globalization.CultureInfo.InvariantCulture));
+            selectedTime = reminder.LocalTime;
+            validTime = true;
+            chosenTime.text = "Editing: " + selectedTime.ToString("MMM d, h:mm:ss tt");
+            schedule.GetComponentInChildren<Text>().text = "Save changes";
+            cancelEdit.gameObject.SetActive(true);
+            status.text = "Edit the text or time, then save. Past reminders need a future time.";
+            pageScroll.verticalNormalizedPosition = 1;
+        }
+
+        private void BeginCustomSnooze(SavedReminder reminder)
+        {
+            if (busy) return;
+            BeginEdit(reminder);
+            customSnooze = true;
+            reminderInput.interactable = false;
+            var initial = DateTime.Now.AddMinutes(10);
+            isPm = initial.Hour >= 12;
+            periodLabel.text = isPm ? "PM" : "AM";
+            timeInput.SetTextWithoutNotify(initial.ToString("h:mm:ss", System.Globalization.CultureInfo.InvariantCulture));
+            UpdateChosenTime(timeInput.text);
+            schedule.GetComponentInChildren<Text>().text = "Confirm snooze";
+            cancelEdit.GetComponentInChildren<Text>().text = "Cancel snooze";
+            status.text = "Choose a new time and AM or PM, then confirm snooze. The original reminder stays unchanged until you confirm.";
+        }
+
+        private void EndEdit()
+        {
+            editingId = 0;
+            customSnooze = false;
+            reminderInput.interactable = true;
+            schedule.GetComponentInChildren<Text>().text = "Set reminder";
+            cancelEdit.gameObject.SetActive(false);
+        }
+
+        private void Snooze(SavedReminder r, DateTime due) =>
+            ChangeReminder(r, () => { r.utcTicks = due.ToUniversalTime().Ticks; r.completed = false; }, "Snoozed until " + due.ToString("MMM d, h:mm:ss tt"));
+
+        private void ChangeReminder(SavedReminder r, Action change, string message)
+        {
+            if (busy) return;
+            try
+            {
+                var before = JsonUtility.ToJson(r);
+                change();
+                try { store.Save(storePath); }
+                catch { JsonUtility.FromJsonOverwrite(before, r); throw; }
+                if (editingId == r.id) EndEdit();
+                deleteConfirmId = 0;
+                RefreshUpcoming();
+                SyncReminder(r);
+                status.text = message;
+            }
+            catch (Exception e) { ShowError(e); }
+        }
+
+        private static void SyncReminder(SavedReminder r)
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            try
+            {
+                AndroidNotificationCenter.CancelNotification(r.id);
+                if (!r.deleted && !r.completed && r.utcTicks > DateTime.UtcNow.Ticks) SendReminder(r);
+            }
+            catch (Exception e) { throw new InvalidOperationException("Change saved, but the phone notification could not be updated. Reopen the app to retry.", e); }
+#endif
         }
 
         private void UpdateChosenTime(string value)
@@ -94,9 +251,9 @@ namespace RememberThis
                     Description = "Reminders at your chosen time"
                 });
                 // Stable IDs avoid duplicate alerts when reopening the app.
-                foreach (var reminder in store.Upcoming(DateTime.UtcNow))
-                    if (AndroidNotificationCenter.CheckScheduledNotificationStatus(reminder.id) == NotificationStatus.Unknown)
-                        SendReminder(reminder);
+                foreach (var reminder in store.reminders)
+                    if (reminder.deleted || reminder.completed || reminder.utcTicks > DateTime.UtcNow.Ticks)
+                        SyncReminder(reminder);
                 status.text = "Ready. Allow notifications when asked, then leave the app to test delivery.";
             }
             catch (Exception e) { ShowError(e); }
@@ -159,11 +316,24 @@ namespace RememberThis
                 yield return null;
 #endif
             }
-            finally { busy = false; schedule.interactable = true; timeInput.interactable = true; reminderInput.interactable = true; }
+            finally { busy = false; schedule.interactable = true; timeInput.interactable = true; reminderInput.interactable = !customSnooze; }
         }
 
         private void SaveReminder(string text, DateTime due)
         {
+            if (editingId != 0)
+            {
+                var existing = store.reminders.Single(r => r.id == editingId && !r.deleted && !r.completed);
+                var oldText = existing.text;
+                var oldTime = existing.utcTicks;
+                existing.text = text; existing.utcTicks = due.ToUniversalTime().Ticks;
+                try { store.Save(storePath); }
+                catch { existing.text = oldText; existing.utcTicks = oldTime; throw; }
+                EndEdit();
+                RefreshUpcoming();
+                SyncReminder(existing);
+                return;
+            }
             var reminder = new SavedReminder { id = store.nextId, text = text, utcTicks = due.ToUniversalTime().Ticks };
             store.nextId = checked(store.nextId + 1);
             store.reminders.Add(reminder);
@@ -182,7 +352,8 @@ namespace RememberThis
         {
             AndroidNotificationCenter.SendNotificationWithExplicitID(new AndroidNotification
             {
-                Title = "Remember This", Text = reminder.text, FireTime = reminder.LocalTime
+                Title = "Remember This", Text = reminder.text, FireTime = reminder.LocalTime,
+                IntentData = "remember-snooze:" + reminder.id + ":" + reminder.utcTicks
             }, Channel, reminder.id);
         }
 #endif
@@ -192,17 +363,10 @@ namespace RememberThis
             if (busy || store == null) return;
             try
             {
-                var reminder = store.reminders.OrderByDescending(r => r.id).FirstOrDefault();
+                var reminder = store.reminders.Where(r => !r.deleted && !r.completed).OrderByDescending(r => r.id).FirstOrDefault();
                 if (reminder == null) { status.text = "No saved reminder to cancel."; return; }
-                store.reminders.Remove(reminder);
-                try { store.Save(storePath); }
-                catch { store.reminders.Add(reminder); throw; }
-#if UNITY_ANDROID && !UNITY_EDITOR
-                AndroidNotificationCenter.CancelNotification(reminder.id);
-                status.text = "Most recently saved reminder canceled.";
-#else
-                status.text = "Most recently saved preview reminder removed.";
-#endif
+                deleteConfirmId = reminder.id;
+                status.text = "Confirm deletion in the reminder list below.";
                 RefreshUpcoming();
             }
             catch (Exception e) { ShowError(e); }
@@ -269,6 +433,7 @@ namespace RememberThis
             content.sizeDelta = Vector2.zero;
             panel.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             var scroll = viewport.GetComponent<ScrollRect>();
+            pageScroll = scroll;
             scroll.viewport = safe; scroll.content = content; scroll.horizontal = false;
             scroll.movementType = ScrollRect.MovementType.Clamped;
             scroll.scrollSensitivity = 35;
@@ -319,12 +484,20 @@ namespace RememberThis
             timeInput.onValueChanged.AddListener(UpdateChosenTime);
             timeInput.text = initialTime.ToString("h:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
             schedule = MakeButton(panel.transform, "Set reminder", () => StartCoroutine(Schedule()));
+            cancelEdit = MakeButton(panel.transform, "Cancel editing", () => { if (!busy) { EndEdit(); status.text = "Editing canceled. Saved reminder unchanged."; } });
+            cancelEdit.gameObject.SetActive(false);
             MakeButton(panel.transform, "Enable exact timing", RequestExactTiming);
             MakeButton(panel.transform, "Cancel most recent reminder", Cancel);
             status = Label(panel.transform, "Starting...", 25, 190);
             Label(panel.transform, "Upcoming reminders — scroll to see all", 28, 75);
-            upcoming = Label(panel.transform, "No upcoming reminders.", 25, 65);
-            Label(panel.transform, "Reminders are saved on this device. Past times leave this list; that does not confirm delivery.", 22, 95);
+            var list = new GameObject("Reminder cards", typeof(RectTransform), typeof(VerticalLayoutGroup));
+            list.transform.SetParent(panel.transform, false);
+            var listLayout = list.GetComponent<VerticalLayoutGroup>();
+            listLayout.spacing = 14;
+            listLayout.childControlWidth = listLayout.childControlHeight = true;
+            listLayout.childForceExpandHeight = false;
+            reminderList = list.transform;
+            Label(panel.transform, "Snooze starts from now. Tomorrow means this time tomorrow. Past due does not confirm notification delivery.", 22, 95);
         }
 
         private static InputField MakeTimeInput(Transform parent)

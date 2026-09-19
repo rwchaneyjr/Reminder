@@ -31,6 +31,19 @@ namespace RememberThis.Editor
                 loaded.reminders.RemoveAt(2);
                 loaded.Save(path);
                 Require(ReminderStore.Load(path).reminders.Count == 2 && File.Exists(path + ".bak"), "Replacement save must persist changes and keep a backup.");
+                loaded.reminders[0].completed = true;
+                loaded.reminders[1].deleted = true;
+                loaded.Save(path);
+                loaded = ReminderStore.Load(path);
+                Require(loaded.reminders[0].completed && loaded.reminders[1].deleted, "Completed and deleted states must survive reopening.");
+                Require(!loaded.Upcoming(now).Any(), "Completed and deleted reminders must not be scheduled as upcoming.");
+                var originalId = loaded.reminders[0].id;
+                loaded.reminders[0].completed = false;
+                loaded.reminders[0].text = "Edited reminder";
+                loaded.reminders[0].utcTicks = now.AddMinutes(10).Ticks;
+                loaded.Save(path);
+                loaded = ReminderStore.Load(path);
+                Require(loaded.Upcoming(now).Single().id == originalId && loaded.Upcoming(now).Single().text == "Edited reminder", "Editing and snoozing must retain the notification ID and leave deleted reminders excluded.");
                 File.WriteAllText(path, "not valid json");
                 bool rejected = false;
                 try { ReminderStore.Load(path); } catch { rejected = true; }

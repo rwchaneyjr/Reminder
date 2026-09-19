@@ -1,0 +1,41 @@
+package com.unity.androidnotifications;
+
+import android.app.Activity;
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
+
+public final class ReminderNotificationActions {
+    private static final String EXTRA = "remember_this_snooze";
+
+    // Attach only at delivery: PendingIntent cannot safely be persisted in a Parcel.
+    public static void attach(Context context, Class<?> activity, Notification.Builder builder, int id) {
+        String token = builder.getExtras().getString("data", "");
+        if (!token.startsWith("remember-snooze:")) return;
+        addAction(context, activity, builder, id, token, "snooze", "Snooze 10 min");
+        addAction(context, activity, builder, id, token, "cancel", "Cancel");
+    }
+
+    private static void addAction(Context context, Class<?> activity, Notification.Builder builder,
+                                  int id, String token, String action, String label) {
+        Intent intent = new Intent(context, activity);
+        intent.setAction("com.rememberthis." + action + "." + id);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.putExtra(EXTRA, token + ":" + action);
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= 23) flags |= PendingIntent.FLAG_IMMUTABLE;
+        PendingIntent pending = PendingIntent.getActivity(context, id, intent, flags);
+        builder.addAction(android.R.drawable.ic_lock_idle_alarm, label, pending);
+    }
+
+    public static String peek(Activity activity) {
+        String token = activity.getIntent().getStringExtra(EXTRA);
+        return token == null ? "" : token;
+    }
+
+    public static void acknowledge(Activity activity, String token) {
+        if (token.equals(peek(activity))) activity.getIntent().removeExtra(EXTRA);
+    }
+}

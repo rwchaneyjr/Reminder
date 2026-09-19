@@ -14,9 +14,17 @@ For a quick test, choose a time 20–30 seconds ahead. Invalid times are rejecte
 
 Each reminder gets a separate notification. Scroll down for Upcoming, sorted by time. Reminders are stored in `reminders.json` under Unity's persistent data directory, with a backup on replacement saves. Reopening restores the list and retries missing future Android notifications. Passed times leave Upcoming but remain stored; this does not prove delivery. Times are stored as UTC instants and displayed in local time.
 
-**Cancel most recent reminder** removes only the last saved reminder and its notification. Editor Play mode saves preview reminders locally but sends no Android alerts. The old single test notification is not imported. Reinstall the APK without uninstalling the app to preserve app data.
+Each reminder has **Edit**, **Complete**, **Delete**, and snooze controls. Edit fills the form; **Save changes** updates the same notification ID. **Cancel editing** leaves the saved reminder unchanged. Past reminders require a future time before an edit can be saved. **Delete** requires confirmation; **Keep** cancels deletion. **Complete** cancels the notification and moves the reminder to Completed. Completed reminders can be deleted.
+
+Snooze uses **10 minutes**, **1 hour**, or **this time tomorrow**, measured from now. Past due reminders stay accessible for these actions. Completed and deleted flags persist; deleted records stay hidden so the app can retry canceling their notifications on reopening. **Cancel most recent reminder** opens a deletion confirmation for the latest active record. Editor Play mode saves preview reminders locally but sends no Android alerts. Reinstall the APK without uninstalling the app to preserve app data.
 
 Run **Remember This > Check reminder storage** for reload, unique IDs, ordering, backup, and corruption checks. Rebuild the APK for device testing.
+
+## Notification actions
+
+New notifications have **Snooze 10 min** and **Cancel** actions. Expand the Android notification if the buttons are hidden. Tapping either opens/resumes the app and applies the action automatically: Snooze schedules the same reminder ten minutes from now; Cancel marks it complete and dismisses its notification. This is a normal notification, not a continuously ringing full-screen alarm. An obsolete notification cannot change an edited, deleted, or completed reminder.
+
+The Android build hook adds the actions when Mobile Notifications 2.4.3 delivers the notification, so action PendingIntents are not serialized into its stored notifications. It changes generated Gradle sources only and fails the build if the expected integration point changes. Test actions with the app open, backgrounded, and dismissed. Rebuild and reinstall before testing; existing displayed notifications do not gain buttons retroactively.
 
 ## Device acceptance checks
 
@@ -35,6 +43,12 @@ Record phone model, Android version, target time, actual delivery time, and resu
 | Same time | Two reminders have distinct notifications |
 | Close and reopen | Upcoming text and times survive, without duplicate notifications |
 | Cancel most recent | Older reminders remain scheduled |
+| Edit one of two reminders | Only that reminder changes; its old alert is canceled and the new text/time fires |
+| Cancel editing | Original text/time stay saved |
+| Complete and reopen | Record stays Completed and no longer fires |
+| Delete then Keep | Reminder stays unchanged |
+| Confirm Delete and reopen | Record stays hidden and no longer fires |
+| Snooze a past-due reminder | Record returns to Upcoming at the displayed new time with one notification |
 
 Test Android Settings **Force stop** separately from dismissing recent apps. It is not the normal closed-app acceptance case. Also check channel settings, Do Not Disturb, and battery restrictions when diagnosing missing alerts. This prototype is not a reliability guarantee.
 
