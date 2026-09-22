@@ -3,6 +3,9 @@
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
 .utmp/
+# Reproducible offline speech dependencies; restore with Tools/Restore-Whisper.ps1.
+/Packages/com.whisper.unity/
+/Assets/StreamingAssets/Whisper/ggml-tiny.bin
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
@@ -73,3 +76,7 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Private Android signing keys
+*.keystore
+*.jks

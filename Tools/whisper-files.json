@@ -1,0 +1,582 @@
+[
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Assets/StreamingAssets.meta",
+    "target": "Assets/StreamingAssets.meta",
+    "sha": "83c741b22c1b857057e6d12c599fc528daf2dff1"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Assets/StreamingAssets/Whisper.meta",
+    "target": "Assets/StreamingAssets/Whisper.meta",
+    "sha": "e9067920fd1cde719b0de6d36421646eccedeaa2"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Assets/StreamingAssets/Whisper/ggml-tiny.bin",
+    "target": "Assets/StreamingAssets/Whisper/ggml-tiny.bin",
+    "sha": "3a3c70921e54213b5cb4595c35aa208721718205"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Assets/StreamingAssets/Whisper/ggml-tiny.bin.meta",
+    "target": "Assets/StreamingAssets/Whisper/ggml-tiny.bin.meta",
+    "sha": "715aceb794fde5c982091756b172a978dad2b004"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/LICENSE.MD",
+    "target": "Assets/Resources/WhisperLicense.txt",
+    "sha": "91b9100df92e24e350ccb383bf982b560d2c49b2"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Editor.meta",
+    "target": "Packages/com.whisper.unity/Editor.meta",
+    "sha": "7523d7b75a4ab3732dba5c6c98c672038aaebac4"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Editor/CheckAndroidPreprocessBuild.cs",
+    "target": "Packages/com.whisper.unity/Editor/CheckAndroidPreprocessBuild.cs",
+    "sha": "8a32904ffc0558646626b57af44a7bfe3d105bd8"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Editor/CheckAndroidPreprocessBuild.cs.meta",
+    "target": "Packages/com.whisper.unity/Editor/CheckAndroidPreprocessBuild.cs.meta",
+    "sha": "d5df6e4c23b5576c8d9a11504f57cca6e2283046"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Editor/DisableBitcodePostProcess.cs",
+    "target": "Packages/com.whisper.unity/Editor/DisableBitcodePostProcess.cs",
+    "sha": "ec59626122b1e1d949c3e1bb86901fdcd497b999"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Editor/DisableBitcodePostProcess.cs.meta",
+    "target": "Packages/com.whisper.unity/Editor/DisableBitcodePostProcess.cs.meta",
+    "sha": "098b64ab6ad9145a27ce4bc9d271c742bf1dfa24"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Editor/com.whisper.unity.editor.asmdef",
+    "target": "Packages/com.whisper.unity/Editor/com.whisper.unity.editor.asmdef",
+    "sha": "bbdf583f40dc1842ea0e7e3547484e7eeb32af3c"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Editor/com.whisper.unity.editor.asmdef.meta",
+    "target": "Packages/com.whisper.unity/Editor/com.whisper.unity.editor.asmdef.meta",
+    "sha": "6d77024c4b8fe1fd61c3bbaf169c661863333dbf"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins.meta",
+    "target": "Packages/com.whisper.unity/Plugins.meta",
+    "sha": "b2d148f84a9dfbd0c3874a3d67898939125a43ea"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/Android.meta",
+    "target": "Packages/com.whisper.unity/Plugins/Android.meta",
+    "sha": "5bffe13b98d0cee1abaf7c8348e022c7ba2d1803"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/Android/libggml-base.a",
+    "target": "Packages/com.whisper.unity/Plugins/Android/libggml-base.a",
+    "sha": "d2bea35639e548986d1995379fc4fc90ab1d56bd"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/Android/libggml-base.a.meta",
+    "target": "Packages/com.whisper.unity/Plugins/Android/libggml-base.a.meta",
+    "sha": "a2b98fc74708d510950fe47a89d19c167f41bb6f"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/Android/libggml-cpu.a",
+    "target": "Packages/com.whisper.unity/Plugins/Android/libggml-cpu.a",
+    "sha": "5a3dc6e0ce685fa1ecb34ebdec0f81be5a81d5f4"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/Android/libggml-cpu.a.meta",
+    "target": "Packages/com.whisper.unity/Plugins/Android/libggml-cpu.a.meta",
+    "sha": "24c12c0723b18689a74a1936746a45aceaa55e1c"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/Android/libggml.a",
+    "target": "Packages/com.whisper.unity/Plugins/Android/libggml.a",
+    "sha": "02df7471ced23344c7039fb58b9769b6f7c23cbe"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/Android/libggml.a.meta",
+    "target": "Packages/com.whisper.unity/Plugins/Android/libggml.a.meta",
+    "sha": "6bd6e21584e5099d80c0051a09a8868551b5e979"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/Android/libwhisper.a",
+    "target": "Packages/com.whisper.unity/Plugins/Android/libwhisper.a",
+    "sha": "a553d18022b1b01cf6ad78eb48af5257c564e525"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/Android/libwhisper.a.meta",
+    "target": "Packages/com.whisper.unity/Plugins/Android/libwhisper.a.meta",
+    "sha": "5fb1fe3a2fe73efdfb725bd3478df55b3c91736c"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/MacOS.meta",
+    "target": "Packages/com.whisper.unity/Plugins/MacOS.meta",
+    "sha": "0d49bccecf1718b78f0c1f852cf17f24bffb1500"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/MacOS/libggml-base.dylib",
+    "target": "Packages/com.whisper.unity/Plugins/MacOS/libggml-base.dylib",
+    "sha": "25959d47e07842c4e345ad94663d700b5e6e3228"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/MacOS/libggml-base.dylib.meta",
+    "target": "Packages/com.whisper.unity/Plugins/MacOS/libggml-base.dylib.meta",
+    "sha": "7e42d13e78275e82f8a2c5fd5fb6446d669e753f"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/MacOS/libggml-blas.dylib",
+    "target": "Packages/com.whisper.unity/Plugins/MacOS/libggml-blas.dylib",
+    "sha": "8e8dfb954b5c4a0010601ba1ed87020f1d909a21"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/MacOS/libggml-blas.dylib.meta",
+    "target": "Packages/com.whisper.unity/Plugins/MacOS/libggml-blas.dylib.meta",
+    "sha": "17221d463434de627ef6e7299d996f11b31e3401"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/MacOS/libggml-cpu.dylib",
+    "target": "Packages/com.whisper.unity/Plugins/MacOS/libggml-cpu.dylib",
+    "sha": "e421ea31d22606cc4dc32569403ef55429b0dd8c"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/MacOS/libggml-cpu.dylib.meta",
+    "target": "Packages/com.whisper.unity/Plugins/MacOS/libggml-cpu.dylib.meta",
+    "sha": "6e01658e3eb94c2341d701b4ffdc6a28e812f257"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/MacOS/libggml-metal.dylib",
+    "target": "Packages/com.whisper.unity/Plugins/MacOS/libggml-metal.dylib",
+    "sha": "d30e71d566a27cb1ac21c9e4d6f3fced592efb35"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/MacOS/libggml-metal.dylib.meta",
+    "target": "Packages/com.whisper.unity/Plugins/MacOS/libggml-metal.dylib.meta",
+    "sha": "a4656bf39fdb79f6eaa5cd7296ca5256b48dda11"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/MacOS/libggml.dylib",
+    "target": "Packages/com.whisper.unity/Plugins/MacOS/libggml.dylib",
+    "sha": "b8c8d422dce950bcd8e7ae76f83e736863668a76"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/MacOS/libggml.dylib.meta",
+    "target": "Packages/com.whisper.unity/Plugins/MacOS/libggml.dylib.meta",
+    "sha": "2877989ef6760c7ac86d7cb1965ebfaf9ca589e1"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/MacOS/libwhisper.dylib",
+    "target": "Packages/com.whisper.unity/Plugins/MacOS/libwhisper.dylib",
+    "sha": "845155179586e6fba02f1650151e9f3df9e15165"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/MacOS/libwhisper.dylib.meta",
+    "target": "Packages/com.whisper.unity/Plugins/MacOS/libwhisper.dylib.meta",
+    "sha": "bab785eac3d52c19ec33304058820754a2180f7d"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/Windows.meta",
+    "target": "Packages/com.whisper.unity/Plugins/Windows.meta",
+    "sha": "af614bcbb1959b18440a4ab96549e8e2db1009b1"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/Windows/ggml-base.dll",
+    "target": "Packages/com.whisper.unity/Plugins/Windows/ggml-base.dll",
+    "sha": "f8784afb4561207344c34bf6eef32ce2e6e7dbb3"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/Windows/ggml-base.dll.meta",
+    "target": "Packages/com.whisper.unity/Plugins/Windows/ggml-base.dll.meta",
+    "sha": "e3a08499d1b1157cc5419abaa3ae68ff9a961c42"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/Windows/ggml-cpu.dll",
+    "target": "Packages/com.whisper.unity/Plugins/Windows/ggml-cpu.dll",
+    "sha": "1433132d207ad6856810d0f80fedb38ead22d95f"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/Windows/ggml-cpu.dll.meta",
+    "target": "Packages/com.whisper.unity/Plugins/Windows/ggml-cpu.dll.meta",
+    "sha": "9dca4866d0b9522527b97c82de10bab8865b1055"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/Windows/ggml-vulkan.dll",
+    "target": "Packages/com.whisper.unity/Plugins/Windows/ggml-vulkan.dll",
+    "sha": "959fdf6a9e419db80e8324f0c65781263ab122d8"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/Windows/ggml-vulkan.dll.meta",
+    "target": "Packages/com.whisper.unity/Plugins/Windows/ggml-vulkan.dll.meta",
+    "sha": "8951dbd1cdaaa5d0d9a4e2ec7964a422e819a857"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/Windows/ggml.dll",
+    "target": "Packages/com.whisper.unity/Plugins/Windows/ggml.dll",
+    "sha": "7593592f21e0bf99ecc21869453aa59640a2011b"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/Windows/ggml.dll.meta",
+    "target": "Packages/com.whisper.unity/Plugins/Windows/ggml.dll.meta",
+    "sha": "60a9b0d15345559150936e90f5141899ac5f297c"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/Windows/libwhisper.dll",
+    "target": "Packages/com.whisper.unity/Plugins/Windows/libwhisper.dll",
+    "sha": "85493d6a99dba33747f8061687fd8f95f063e1da"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/Windows/libwhisper.dll.meta",
+    "target": "Packages/com.whisper.unity/Plugins/Windows/libwhisper.dll.meta",
+    "sha": "d53cf7fc1782b3d6ee2f1a2545d7aa714a112164"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/iOS.meta",
+    "target": "Packages/com.whisper.unity/Plugins/iOS.meta",
+    "sha": "71ebada57a2e84ccd97ffed87cc3dfb03bff1d60"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/iOS/libggml-base.a",
+    "target": "Packages/com.whisper.unity/Plugins/iOS/libggml-base.a",
+    "sha": "3320345700ea9702c4388b9eb41d959983fc5005"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/iOS/libggml-base.a.meta",
+    "target": "Packages/com.whisper.unity/Plugins/iOS/libggml-base.a.meta",
+    "sha": "4224cd737d64a15d38168b0b05ec7d6740c5a529"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/iOS/libggml-blas.a",
+    "target": "Packages/com.whisper.unity/Plugins/iOS/libggml-blas.a",
+    "sha": "76f7ffaf0c167e05bb158f686f865fe72346ecfc"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/iOS/libggml-blas.a.meta",
+    "target": "Packages/com.whisper.unity/Plugins/iOS/libggml-blas.a.meta",
+    "sha": "c4a6c92e64e548d3de26b48afd4bf7cff1dc3a1e"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/iOS/libggml-cpu.a",
+    "target": "Packages/com.whisper.unity/Plugins/iOS/libggml-cpu.a",
+    "sha": "716a4d47d4eaf88e33436f07693bd61b1422a1ef"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/iOS/libggml-cpu.a.meta",
+    "target": "Packages/com.whisper.unity/Plugins/iOS/libggml-cpu.a.meta",
+    "sha": "7c072643ac6cf6e93298bc0bc2f9e88856056674"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/iOS/libggml-metal.a",
+    "target": "Packages/com.whisper.unity/Plugins/iOS/libggml-metal.a",
+    "sha": "7452e949a20dc4e10af8646bda019da36eb3c95d"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/iOS/libggml-metal.a.meta",
+    "target": "Packages/com.whisper.unity/Plugins/iOS/libggml-metal.a.meta",
+    "sha": "8496fa98b4e9bd93b53c61a0b58bb50300dc16a3"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/iOS/libggml.a",
+    "target": "Packages/com.whisper.unity/Plugins/iOS/libggml.a",
+    "sha": "3d8b308d1369200f812c6cdd2638c5f5abf32ec9"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/iOS/libggml.a.meta",
+    "target": "Packages/com.whisper.unity/Plugins/iOS/libggml.a.meta",
+    "sha": "b2b72a00ac3d08398539f22082a8dc1bde6ec786"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/iOS/libwhisper.a",
+    "target": "Packages/com.whisper.unity/Plugins/iOS/libwhisper.a",
+    "sha": "12170bfee9359115f41d2b87c15e6bb674d4d30a"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Plugins/iOS/libwhisper.a.meta",
+    "target": "Packages/com.whisper.unity/Plugins/iOS/libwhisper.a.meta",
+    "sha": "826570fceb0f86195ff572ebe32b8608349722ad"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime.meta",
+    "target": "Packages/com.whisper.unity/Runtime.meta",
+    "sha": "7605f1202bbe26df0892fd6e5ddf69244637ed0c"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Native.meta",
+    "target": "Packages/com.whisper.unity/Runtime/Native.meta",
+    "sha": "c49ea590e7d1ea5d63e39268ba5bdee1624f1975"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Native/WhisperNative.cs",
+    "target": "Packages/com.whisper.unity/Runtime/Native/WhisperNative.cs",
+    "sha": "4e424635d6661681acd6edeaf59e95ee51141d3a"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Native/WhisperNative.cs.meta",
+    "target": "Packages/com.whisper.unity/Runtime/Native/WhisperNative.cs.meta",
+    "sha": "962c8cb8efb471078c55034dfae113943f0f203a"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Native/WhisperNativeParams.cs",
+    "target": "Packages/com.whisper.unity/Runtime/Native/WhisperNativeParams.cs",
+    "sha": "acd0102ac92cdc6724bd4d777e61a43823341c4d"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Native/WhisperNativeParams.cs.meta",
+    "target": "Packages/com.whisper.unity/Runtime/Native/WhisperNativeParams.cs.meta",
+    "sha": "d1873fcbcf92aa00340e3fcd2487fccad7c9f8a1"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Utils.meta",
+    "target": "Packages/com.whisper.unity/Runtime/Utils.meta",
+    "sha": "8c9667b5cdd2958157e6c1f7f0205a535e9edbfd"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Utils/AudioUtils.cs",
+    "target": "Packages/com.whisper.unity/Runtime/Utils/AudioUtils.cs",
+    "sha": "a84da3913b7a53d0789e778b83491db002b74456"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Utils/AudioUtils.cs.meta",
+    "target": "Packages/com.whisper.unity/Runtime/Utils/AudioUtils.cs.meta",
+    "sha": "99058732b1a54eb782b316a52ff16e38c12baa58"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Utils/FileUtils.cs",
+    "target": "Packages/com.whisper.unity/Runtime/Utils/FileUtils.cs",
+    "sha": "e444280760eecdcded7cf220ff46a688873e7206"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Utils/FileUtils.cs.meta",
+    "target": "Packages/com.whisper.unity/Runtime/Utils/FileUtils.cs.meta",
+    "sha": "bcdaedf4cbaa7762cc5580dc45ce2bd7075631bf"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Utils/LogUtils.cs",
+    "target": "Packages/com.whisper.unity/Runtime/Utils/LogUtils.cs",
+    "sha": "f72dfe02f16c4042ff859daa84fa448bd26867ac"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Utils/LogUtils.cs.meta",
+    "target": "Packages/com.whisper.unity/Runtime/Utils/LogUtils.cs.meta",
+    "sha": "2a986561ec7e36013db06f8994e399a3f197c546"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Utils/MainThreadDispatcher.cs",
+    "target": "Packages/com.whisper.unity/Runtime/Utils/MainThreadDispatcher.cs",
+    "sha": "df80a9b9fabaa8036b4c947dd5987c9bb82a3ea6"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Utils/MainThreadDispatcher.cs.meta",
+    "target": "Packages/com.whisper.unity/Runtime/Utils/MainThreadDispatcher.cs.meta",
+    "sha": "eaf3739ba1e3e16efabee52804fdbaf685fdc67c"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Utils/MicrophoneRecord.cs",
+    "target": "Packages/com.whisper.unity/Runtime/Utils/MicrophoneRecord.cs",
+    "sha": "d70ff38d94786acced741398b31260073b5a6148"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Utils/MicrophoneRecord.cs.meta",
+    "target": "Packages/com.whisper.unity/Runtime/Utils/MicrophoneRecord.cs.meta",
+    "sha": "c7f9a937835dbf383d95d83f748fd6e989917599"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Utils/PlayAudioAndDestroy.cs",
+    "target": "Packages/com.whisper.unity/Runtime/Utils/PlayAudioAndDestroy.cs",
+    "sha": "3dfb0c804d9a30ec7e902cf7fb36bd6940b76af8"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Utils/PlayAudioAndDestroy.cs.meta",
+    "target": "Packages/com.whisper.unity/Runtime/Utils/PlayAudioAndDestroy.cs.meta",
+    "sha": "57fc224e2c04eeac221c71dfaf56bcca01c78831"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Utils/RotatingCube.cs",
+    "target": "Packages/com.whisper.unity/Runtime/Utils/RotatingCube.cs",
+    "sha": "a75992a0121d5783b2dcb6bc4a22231ce1182268"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Utils/RotatingCube.cs.meta",
+    "target": "Packages/com.whisper.unity/Runtime/Utils/RotatingCube.cs.meta",
+    "sha": "ea13a646ce96cc1673f5bbfae251b7f11b3dfa2b"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Utils/TextUtils.cs",
+    "target": "Packages/com.whisper.unity/Runtime/Utils/TextUtils.cs",
+    "sha": "2510935ea7bc65ce658f0048de4d2279047a09bc"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Utils/TextUtils.cs.meta",
+    "target": "Packages/com.whisper.unity/Runtime/Utils/TextUtils.cs.meta",
+    "sha": "5fc0310ce37f99f8bdf7cb4aa1b11d2a3a010a8e"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Utils/UiUtils.cs",
+    "target": "Packages/com.whisper.unity/Runtime/Utils/UiUtils.cs",
+    "sha": "d38ecf080ea034757405984fd4209fea3f345732"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/Utils/UiUtils.cs.meta",
+    "target": "Packages/com.whisper.unity/Runtime/Utils/UiUtils.cs.meta",
+    "sha": "0a3316fbb61e40642979fa6979b286a93ea87cdd"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/WhisperLanguage.cs",
+    "target": "Packages/com.whisper.unity/Runtime/WhisperLanguage.cs",
+    "sha": "3031af1b1835acc07c84c331f7537ae22a46bb05"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/WhisperLanguage.cs.meta",
+    "target": "Packages/com.whisper.unity/Runtime/WhisperLanguage.cs.meta",
+    "sha": "bfac9333fabad26f62508e22ccf090fa44ea82ab"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/WhisperManager.cs",
+    "target": "Packages/com.whisper.unity/Runtime/WhisperManager.cs",
+    "sha": "732938d22e6feceb712b1bab58576c31912a9225"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/WhisperManager.cs.meta",
+    "target": "Packages/com.whisper.unity/Runtime/WhisperManager.cs.meta",
+    "sha": "684e09196c9a95586d6828a4c38a7f80f10e0c87"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/WhisperParams.cs",
+    "target": "Packages/com.whisper.unity/Runtime/WhisperParams.cs",
+    "sha": "8041e10921f1d3d5f9d41b110dbaeec2190608f3"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/WhisperParams.cs.meta",
+    "target": "Packages/com.whisper.unity/Runtime/WhisperParams.cs.meta",
+    "sha": "1fc2eda6f20fab8095b5e4a09f9e084c5afc5fe4"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/WhisperResult.cs",
+    "target": "Packages/com.whisper.unity/Runtime/WhisperResult.cs",
+    "sha": "bfb8b388c4855262ffae03e507f6f32aabb8c330"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/WhisperResult.cs.meta",
+    "target": "Packages/com.whisper.unity/Runtime/WhisperResult.cs.meta",
+    "sha": "92c5bb01ef96225a3ea6fe014834e9de10a38709"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/WhisperStream.cs",
+    "target": "Packages/com.whisper.unity/Runtime/WhisperStream.cs",
+    "sha": "782fe609b3abb025e08b7324c29d92f8af9826a1"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/WhisperStream.cs.meta",
+    "target": "Packages/com.whisper.unity/Runtime/WhisperStream.cs.meta",
+    "sha": "0133e0b915262e9ebd25f02ba9af8c38266bbc86"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/WhisperWrapper.cs",
+    "target": "Packages/com.whisper.unity/Runtime/WhisperWrapper.cs",
+    "sha": "ddc5e5998d76db38f62658751ab64454d65609b4"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/WhisperWrapper.cs.meta",
+    "target": "Packages/com.whisper.unity/Runtime/WhisperWrapper.cs.meta",
+    "sha": "1b99ab2cba33d4d90b56117a2bc58b86e4688583"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/com.whisper.unity.asmdef",
+    "target": "Packages/com.whisper.unity/Runtime/com.whisper.unity.asmdef",
+    "sha": "84c252677f594178c12a2fe19d7235be9e23ee29"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Runtime/com.whisper.unity.asmdef.meta",
+    "target": "Packages/com.whisper.unity/Runtime/com.whisper.unity.asmdef.meta",
+    "sha": "c4a8089617a8d09b995e43387e9121c723fc7a2d"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Tests.meta",
+    "target": "Packages/com.whisper.unity/Tests.meta",
+    "sha": "4c3757f876699f083137086721ee930f66480aa9"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Tests/Runtime.meta",
+    "target": "Packages/com.whisper.unity/Tests/Runtime.meta",
+    "sha": "bd1ebeb919d7c640f3024624679ef75362fb8802"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Tests/Runtime/AudioUtilsTests.cs",
+    "target": "Packages/com.whisper.unity/Tests/Runtime/AudioUtilsTests.cs",
+    "sha": "5851bbebc7859ba2e91f526ca2f5a98c535aa01f"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Tests/Runtime/AudioUtilsTests.cs.meta",
+    "target": "Packages/com.whisper.unity/Tests/Runtime/AudioUtilsTests.cs.meta",
+    "sha": "298ede2de63139abf8325465f1cab1be8b01d817"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Tests/Runtime/WhisperInitTests.cs",
+    "target": "Packages/com.whisper.unity/Tests/Runtime/WhisperInitTests.cs",
+    "sha": "d710e22017ae740234702e990bf11fedb6270991"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Tests/Runtime/WhisperInitTests.cs.meta",
+    "target": "Packages/com.whisper.unity/Tests/Runtime/WhisperInitTests.cs.meta",
+    "sha": "b642fb846dc9bf04d9a5464369bf0e0261caecf0"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Tests/Runtime/WhisperLanguageTests.cs",
+    "target": "Packages/com.whisper.unity/Tests/Runtime/WhisperLanguageTests.cs",
+    "sha": "0690a8fdb210467ad01a3574cdf30c33e24e3003"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Tests/Runtime/WhisperLanguageTests.cs.meta",
+    "target": "Packages/com.whisper.unity/Tests/Runtime/WhisperLanguageTests.cs.meta",
+    "sha": "59df8153b1749b8deeeb04a4f95f6758c90bd2b6"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Tests/Runtime/WhisperParamsTests.cs",
+    "target": "Packages/com.whisper.unity/Tests/Runtime/WhisperParamsTests.cs",
+    "sha": "89546991b8b0bf134e24c28c812a9d8791011128"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Tests/Runtime/WhisperParamsTests.cs.meta",
+    "target": "Packages/com.whisper.unity/Tests/Runtime/WhisperParamsTests.cs.meta",
+    "sha": "a657c792af0caf119581e9d8cbbc5c241083a542"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Tests/Runtime/WhisperPromptTests.cs",
+    "target": "Packages/com.whisper.unity/Tests/Runtime/WhisperPromptTests.cs",
+    "sha": "c8e3970465d84e7e548fac3619c63a5c1dd756b7"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Tests/Runtime/WhisperPromptTests.cs.meta",
+    "target": "Packages/com.whisper.unity/Tests/Runtime/WhisperPromptTests.cs.meta",
+    "sha": "14759c2eb8709b8f45265f71a05996d9bf1ddcdd"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Tests/Runtime/WhisperRunTests.cs",
+    "target": "Packages/com.whisper.unity/Tests/Runtime/WhisperRunTests.cs",
+    "sha": "56dafe12f30f0181e5b80b60c755ed5fc8e944c9"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Tests/Runtime/WhisperRunTests.cs.meta",
+    "target": "Packages/com.whisper.unity/Tests/Runtime/WhisperRunTests.cs.meta",
+    "sha": "347be159bbfc14fe2e785670b2660b93f64d8151"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Tests/Runtime/com.whisper.unity.tests.asmdef",
+    "target": "Packages/com.whisper.unity/Tests/Runtime/com.whisper.unity.tests.asmdef",
+    "sha": "a5f853015132126177778b6db0196d5a49ae968b"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/Tests/Runtime/com.whisper.unity.tests.asmdef.meta",
+    "target": "Packages/com.whisper.unity/Tests/Runtime/com.whisper.unity.tests.asmdef.meta",
+    "sha": "5014d0d664804bac63de1bfcca01acf240c5373b"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/package.json",
+    "target": "Packages/com.whisper.unity/package.json",
+    "sha": "d50ff3a6e184bd5f7325b387fbcbeae120e46364"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/Macoron/whisper.unity/529a628a915a97799e89e061af9cb7c71407124d/Packages/com.whisper.unity/package.json.meta",
+    "target": "Packages/com.whisper.unity/package.json.meta",
+    "sha": "254f544573f25686f5d7d743b44b52c991693b95"
+  }
+]

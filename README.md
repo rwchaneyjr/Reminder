@@ -1,16 +1,34 @@
 # Remember This: notification proof
 
-Local reminders with custom text, chosen times, and a saved Upcoming list. No voice or companion yet.
+Local reminders with typed or spoken text, chosen dates and times, and saved reminder lists. Spoken alerts and a companion are not implemented yet.
+
+The home screen shows **Speak reminder**, **Calendar**, and **My reminders**. Calendar opens the date/time controls, with **Edit reminder text / time** for keyboard entry. My reminders contains the saved list and notification settings. Each section has **Back to home**; longer sections scroll. Voice entry and review open over the current section.
+
+The in-app reminder popup plays a short three-note chime once per reminder time. Snooze and Cancel stop it; a snoozed reminder chimes again when due. It uses device media volume. Background Android notifications retain the system notification sound and respect notification/channel settings; the custom chime runs only while the app is active.
+
+While the app is open, a due saved reminder opens a message window with its text and time, **Snooze 10 minutes**, and **Cancel reminder**. Snooze schedules the same reminder again; Cancel completes it. Overdue unfinished reminders also appear when returning to the app, oldest first. The popup waits for recording or saving to finish. Background notifications still depend on Android delivery; this popup does not prove that a background notification arrived.
+
+## Voice entry
+
+**Menu: calendar / speak / review** opens a preview with **View calendar**, **Speak reminder**, **Edit text / date / time**, **Confirm reminder**, and **Cancel reminder — discard draft**. Speak a whole relative command such as **Call John in one hour**, pause, then review the extracted task and time. If the time is unclear, choose it manually or use **Speak when**. After editing or viewing the calendar, use **Return to menu / confirm**. Confirm uses the existing validation and notification permission flow; The review screen highlights Confirm in green and Cancel in red, with correction options below. Cancel discards the unsaved draft; existing saved reminders remain unchanged. Speech never saves automatically.
+
+The separate When field accepts spoken or typed phrases such as **in an hour**, **in ten minutes**, and **tomorrow at 3 PM**. Clock times require AM/PM. Unsupported or unclear phrases require manual correction. Relative voice times are measured from the recording request, so long transcription delays can leave a short reminder time in the past; it must be corrected before saving. Run `pwsh -File Tools/Test-ReminderCommands.ps1` for parser checks.
+
+Tap **Speak reminder** to start listening immediately, allow microphone access if asked, and speak. After speech followed by about 1.5 seconds of quiet, the app prepares the result and highlights the green **Review and confirm** button. **Done speaking** ends recording manually if background noise prevents pause detection. Recording also stops after about 20 seconds. Pause detection uses microphone volume, so test it with your microphone and normal background noise. Whisper transcribes offline on the device; no Google speech app, account, API key, or runtime download is needed. The first use loads the model and can take longer. Review and correct the result before saving. Whole commands support relative times; the separate When field also supports today/tomorrow with a numeric AM/PM clock time. Other dates can be selected on the calendar. Text is limited to 120 characters. Cancellation, silence, or failure preserves the original text, and speech never saves a reminder automatically.
+
+The bundled tiny multilingual model is configured for English transcription. Test voice in Windows Unity Play mode, Android ARM64, and iOS. BlueStacks needs ARM64 app compatibility and a configured microphone; physical devices remain the release gate. iOS speech integration is included, but the reminder app's notification implementation is still Android-only. Spoken alerts are not implemented. Cancellation during transcription discards the result after processing finishes. Custom snooze keeps text fixed and does not allow voice entry.
+
+Whisper 1.4.0 is pinned to revision `529a628a915a97799e89e061af9cb7c71407124d`. To restore ignored dependencies on a new checkout, run `pwsh -File Tools/Restore-Whisper.ps1` from the project directory. Downloads are checked against pinned Git blob hashes. The approximately 78 MB model and native package libraries stay out of Git; installed files remain on disk and are bundled in builds. Windows, macOS, Android ARM64, and iOS libraries are included; Linux is omitted. Licenses are bundled under Resources and accessible through **Open-source licenses**.
 
 ## Run
 
 1. Open this project in Unity **2022.3.62f2** and let Package Manager install Mobile Notifications **2.4.3**.
 2. Open `Assets/Scenes/SampleScene.unity` and press Play to preview the interface. The UI is created at runtime; no inspector wiring is required. Editor preview does not schedule notifications.
-3. Select **Remember This > Build Android test APK**. The build configures portrait orientation, a development application ID, exact-alarm permission, and notification rescheduling after restart. Output: `Builds/Android/RememberThis.apk`.
+3. Select **Remember This > Build Android test APK**. The build configures **IL2CPP / ARM64**, portrait orientation, a development application ID, microphone permission, exact-alarm permission, and notification rescheduling after restart. Output: `Builds/Android/RememberThis.apk`. The first IL2CPP build can take longer.
 4. Install the APK on your Android phone. Tap **Enable exact timing** if required, allow alarms/reminders, and return to the app.
-5. Enter a clock time from **1 to 12**, such as **2:30** or **2:30:15**, and tap the **AM/PM** button to choose the period. The displayed date shows whether it means today or tomorrow. Tap **Set reminder**, grant notification permission, and check the scheduled time. Leave the app and check the notification drawer.
+5. Choose a day in the month-view calendar, using the arrows to change months or **Today** to return to today. The selected day is green; past days cannot be selected. Enter a clock time from **1 to 12**, such as **2:30** or **2:30:15**, and choose **AM/PM**. Review the full date and time, then tap **Set reminder** and grant notification permission. Leave the app and check the notification drawer.
 
-For a quick test, choose a time 20–30 seconds ahead. Invalid times are rejected; a selected time that passes before saving must be changed. If you enter a time earlier than now, the preview explicitly shows tomorrow.
+For a quick test, select today and a time 20–30 seconds ahead. Invalid or past times are rejected, without silently moving the reminder to tomorrow. Editing and custom snooze use the calendar as well.
 
 Each reminder gets a separate notification. Scroll down for Upcoming, sorted by time. Reminders are stored in `reminders.json` under Unity's persistent data directory, with a backup on replacement saves. Reopening restores the list and retries missing future Android notifications. Passed times leave Upcoming but remain stored; this does not prove delivery. Times are stored as UTC instants and displayed in local time.
 
