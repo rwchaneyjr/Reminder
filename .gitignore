@@ -13,3 +13,7 @@ MemoryCaptures/
 *.user
 *.tmp
 .DS_Store
+*.apk
+*.aab
+*.keystore
+*.jks

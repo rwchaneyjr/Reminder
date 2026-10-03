@@ -1,4 +1,5 @@
 using System;
+using static RememberThis.ReminderLocalization;
 using System.Collections;
 using System.IO;
 using System.Linq;
@@ -50,6 +51,68 @@ namespace RememberThis
         private bool lastSaveSucceeded;
         private GameObject homeSection, editSection, calendarSection, formActions, savedSection;
         private Button backHome;
+        private string languageChoice = "auto";
+
+        private static void RemoveUIObject(GameObject obj)
+        {
+            obj.SetActive(false);
+            if (Application.isPlaying) Destroy(obj);
+            else DestroyImmediate(obj);
+        }
+
+        private static void ClearUIChildren(Transform parent)
+        {
+            for (int i = parent.childCount - 1; i >= 0; i--) RemoveUIObject(parent.GetChild(i).gameObject);
+        }
+
+        private void SelectLanguage(string choice)
+        {
+            if (busy || voicePending || choice == languageChoice) return;
+            try { ReminderLanguagePreference.Save(choice); }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                status.text = T("Could not save language. Please try again.");
+                return;
+            }
+
+            // Keep unsaved text, date/time, and edit/snooze state while rebuilding the labels.
+            var draft = reminderInput.text;
+            var when = whenInput.text;
+            var clock = timeInput.text;
+            var day = selectedDate;
+            var month = calendarMonth;
+            var pm = isPm;
+            languageChoice = NormalizeChoice(choice);
+            ConfigureChoice(languageChoice, Application.systemLanguage == SystemLanguage.Spanish ? "es" : "en");
+            RemoveUIObject(GetComponentInChildren<Canvas>().gameObject);
+            listSignature = null;
+            displayedSecond = -1;
+            BuildUI();
+            reminderInput.SetTextWithoutNotify(draft);
+            whenInput.SetTextWithoutNotify(when);
+            selectedDate = day;
+            calendarMonth = month;
+            isPm = pm;
+            periodLabel.text = isPm ? "PM" : "AM";
+            timeInput.SetTextWithoutNotify(clock);
+            UpdateChosenTime(clock);
+            ShowCalendar();
+            reminderInput.interactable = !customSnooze;
+            schedule.interactable = store != null;
+            if (editingId != 0)
+            {
+                schedule.GetComponentInChildren<Text>(true).text = customSnooze ? T("Confirm snooze") : T("Save changes");
+                cancelEdit.GetComponentInChildren<Text>(true).text = customSnooze ? T("Cancel snooze") : T("Cancel editing");
+                cancelEdit.gameObject.SetActive(true);
+            }
+            status.text = T("Language saved.");
+            RefreshUpcoming();
+#if UNITY_ANDROID && !UNITY_EDITOR
+            try { RegisterChannel(); }
+            catch (Exception e) { ShowError(e); }
+#endif
+        }
 
         private void ShowPage(string page)
         {
@@ -129,7 +192,7 @@ namespace RememberThis
             visibleDueReminder = due;
             dueDialog.SetActive(due != null);
             if (due == null) return;
-            dueMessage.text = due.text + "\n\n" + due.LocalTime.ToString("MMM d, yyyy h:mm:ss tt");
+            dueMessage.text = due.text + "\n\n" + DisplayDate(due.LocalTime, "MMM d, yyyy h:mm:ss tt");
             dueDialog.transform.SetAsLastSibling();
             PlayReminderChime(due);
         }
@@ -140,7 +203,7 @@ namespace RememberThis
             if (reminderAudio != null) reminderAudio.Stop();
             var reminder = visibleDueReminder;
             if (snoozeMinutes > 0) Snooze(reminder, DateTime.Now.AddMinutes(snoozeMinutes));
-            else ChangeReminder(reminder, () => reminder.completed = true, "Alert canceled. Reminder completed.");
+            else ChangeReminder(reminder, () => reminder.completed = true, T("Alert canceled. Reminder completed."));
             ShowDueReminder();
         }
 
@@ -148,9 +211,9 @@ namespace RememberThis
         {
             if (busy) return;
             voiceDialog.SetActive(false);
-            menuPreview.text = "What: " + reminderInput.text + "\nWhen: "
-                + (validTime ? selectedTime.ToString("MMM d, yyyy h:mm:ss tt") : "Choose a time")
-                + "\n\nCheck the message and time. Confirm to save, cancel to discard this draft, or choose a correction below.";
+            menuPreview.text = T("What: ") + reminderInput.text + T("\nWhen: ")
+                + (validTime ? DisplayDate(selectedTime, "MMM d, yyyy h:mm:ss tt") : T("Choose a time"))
+                + T("\n\nCheck the message and time. Confirm to save, cancel to discard this draft, or choose a correction below.");
             reminderMenu.SetActive(true);
         }
 
@@ -173,22 +236,22 @@ namespace RememberThis
                     .OrderByDescending(r => r.id).FirstOrDefault();
                 if (reminder == null)
                 {
-                    menuPreview.text = "No active saved reminder. Transcribing alone does not schedule one.";
+                    menuPreview.text = T("No active saved reminder. Transcribing alone does not schedule one.");
                     return;
                 }
                 var notificationStatus = AndroidNotificationCenter.CheckScheduledNotificationStatus(reminder.id);
-                menuPreview.text = reminder.text + "\nDue: " + reminder.LocalTime.ToString("MMM d, h:mm:ss tt")
-                    + "\nAndroid: " + notificationStatus
-                    + " | Exact timing: " + (AndroidNotificationCenter.UsingExactScheduling ? "on" : "off")
+                menuPreview.text = reminder.text + T("\nDue: ") + DisplayDate(reminder.LocalTime, "MMM d, h:mm:ss tt")
+                    + "\nAndroid: " + T(notificationStatus.ToString())
+                    + T(" | Exact timing: ") + (AndroidNotificationCenter.UsingExactScheduling ? T("on") : T("off"))
                     + "\n" + (notificationStatus == NotificationStatus.Delivered
-                        ? "Android reports it in the notification drawer. Swipe down from the top."
+                        ? T("Android reports it in the notification drawer. Swipe down from the top.")
                         : notificationStatus == NotificationStatus.Scheduled
-                            ? "Still pending. Check the due time; approximate alarms may be delayed."
-                            : "Not confirmed as pending or visible. Check app notification permissions; a dismissed alert can also appear missing.");
+                            ? T("Still pending. Check the due time; approximate alarms may be delayed.")
+                            : T("Not confirmed as pending or visible. Check app notification permissions; a dismissed alert can also appear missing."));
             }
-            catch (Exception e) { menuPreview.text = "Could not check notifications: " + e.Message; }
+            catch (Exception e) { menuPreview.text = T("Could not check notifications: ") + e.Message; }
 #else
-            menuPreview.text = "Notification status requires the Android APK. Unity Play mode only saves a preview.";
+            menuPreview.text = T("Notification status requires the Android APK. Unity Play mode only saves a preview.");
 #endif
         }
 
@@ -210,12 +273,12 @@ namespace RememberThis
             dialogTime = timeStep;
             voiceDialog.SetActive(true);
             if (returnToVoice != null) returnToVoice.gameObject.SetActive(false);
-            voicePrompt.text = timeStep ? "When should I remind you?" : "Speak your reminder";
-            voiceHeard.text = timeStep ? "For example: in an hour, or tomorrow at 3 PM." : "For example: Call John in one hour. Then pause when you are finished.";
-            voiceNext.GetComponentInChildren<Text>().text = "Review and confirm";
+            voicePrompt.text = timeStep ? T("When should I remind you?") : T("Speak your reminder");
+            voiceHeard.text = timeStep ? T("For example: in an hour, or tomorrow at 3 PM.") : T("For example: Call John in one hour. Then pause when you are finished.");
+            voiceNext.GetComponentInChildren<Text>().text = T("Review and confirm");
             voiceNext.interactable = false;
             voiceNext.GetComponent<Image>().color = Color.white;
-            dialogRecord.GetComponentInChildren<Text>().text = "Speak reminder";
+            dialogRecord.GetComponentInChildren<Text>().text = T("Speak reminder");
             RecordDialogAnswer();
         }
 
@@ -225,7 +288,7 @@ namespace RememberThis
             voiceNext.interactable = false;
             voiceNext.GetComponent<Image>().color = Color.white;
             StartVoice();
-            dialogRecord.GetComponentInChildren<Text>().text = "Done speaking?";
+            dialogRecord.GetComponentInChildren<Text>().text = T("Done speaking?");
         }
 
         private void StartTimeVoice()
@@ -241,12 +304,12 @@ namespace RememberThis
             if (voicePending)
             {
                 offlineVoice.Stop();
-                voiceStatus.text = "Preparing your reminder…";
+                voiceStatus.text = T("Preparing your reminder…");
                 return;
             }
             if (busy || customSnooze)
             {
-                voiceStatus.text = "Finish the current action before recording.";
+                voiceStatus.text = T("Finish the current action before recording.");
                 return;
             }
             if (offlineVoice == null)
@@ -258,7 +321,7 @@ namespace RememberThis
                     if (voiceHeard != null) voiceHeard.text = message;
                     bool canStop = !offlineVoice.IsProcessing;
                     voiceButton.interactable = timeVoiceButton.interactable = dialogRecord.interactable = canStop;
-                    var label = canStop ? "Done speaking?" : "Preparing reminder…";
+                    var label = canStop ? T("Done speaking?") : T("Preparing reminder…");
                     voiceButton.GetComponentInChildren<Text>().text = label;
                     timeVoiceButton.GetComponentInChildren<Text>().text = label;
                     dialogRecord.GetComponentInChildren<Text>().text = label;
@@ -268,8 +331,8 @@ namespace RememberThis
             busy = voicePending = true;
             schedule.interactable = false;
             reminderInput.interactable = false;
-            voiceButton.GetComponentInChildren<Text>().text = "Done speaking?";
-            timeVoiceButton.GetComponentInChildren<Text>().text = "Done speaking?";
+            voiceButton.GetComponentInChildren<Text>().text = T("Done speaking?");
+            timeVoiceButton.GetComponentInChildren<Text>().text = T("Done speaking?");
             cancelVoice.gameObject.SetActive(true);
             spokenAt = DateTime.Now;
             offlineVoice.Begin();
@@ -281,8 +344,8 @@ namespace RememberThis
             voiceButton.interactable = timeVoiceButton.interactable = dialogRecord.interactable = true;
             schedule.interactable = store != null;
             reminderInput.interactable = !customSnooze;
-            voiceButton.GetComponentInChildren<Text>().text = "Speak reminder";
-            timeVoiceButton.GetComponentInChildren<Text>().text = "Speak when";
+            voiceButton.GetComponentInChildren<Text>().text = T("Speak reminder");
+            timeVoiceButton.GetComponentInChildren<Text>().text = T("Speak when");
             cancelVoice.gameObject.SetActive(false);
             if (text != null)
             {
@@ -299,8 +362,8 @@ namespace RememberThis
                         timeInput.text = "";
                         validTime = false;
                     }
-                    voiceStatus.text = "What: " + reminderInput.text + "\nWhen: "
-                        + (validTime ? selectedTime.ToString("MMM d, h:mm:ss tt") : "Choose or speak a time before confirming.");
+                    voiceStatus.text = T("What: ") + reminderInput.text + T("\nWhen: ")
+                        + (validTime ? DisplayDate(selectedTime, "MMM d, h:mm:ss tt") : T("Choose or speak a time before confirming."));
                 }
                 else
                 {
@@ -311,11 +374,11 @@ namespace RememberThis
             else voiceStatus.text = error;
             if (voiceDialog != null && voiceDialog.activeSelf)
             {
-                voiceHeard.text = text == null ? error : "Heard: " + text + "\n" + voiceStatus.text;
+                voiceHeard.text = text == null ? error : T("Heard: ") + text + "\n" + voiceStatus.text;
                 voiceNext.interactable = text != null;
                 voiceNext.GetComponent<Image>().color = text != null ? new Color(0.78f, 0.95f, 0.81f) : Color.white;
                 voiceNext.GetComponentInChildren<Text>().fontStyle = FontStyle.Bold;
-                dialogRecord.GetComponentInChildren<Text>().text = "Speak reminder";
+                dialogRecord.GetComponentInChildren<Text>().text = T("Speak reminder");
             }
             voiceForTime = false;
 
@@ -326,13 +389,13 @@ namespace RememberThis
             if (ReminderCommandParser.TryParseWhen(text, reference, selectedDate, out var due))
             {
                 SetVoiceDue(due);
-                voiceStatus.text = "When: " + due.ToString("MMM d, h:mm:ss tt") + "\nReview before saving.";
+                voiceStatus.text = T("When: ") + DisplayDate(due, "MMM d, h:mm:ss tt") + T("\nReview before saving.");
             }
             else
             {
                 timeInput.text = "";
                 validTime = false;
-                voiceStatus.text = "Time unclear. Try 'in an hour' or 'tomorrow at 3 PM', or use the calendar and clock.";
+                voiceStatus.text = T("Time unclear. Try 'in an hour' or 'tomorrow at 3 PM', or use the calendar and clock.");
             }
         }
         private void SetVoiceDue(DateTime due)
@@ -356,16 +419,16 @@ namespace RememberThis
         private void ShowCalendar()
         {
             if (calendar == null) return;
-            foreach (Transform child in calendar) { child.gameObject.SetActive(false); Destroy(child.gameObject); }
+            ClearUIChildren(calendar);
             var navigation = ActionRow(calendar);
             MakeButton(navigation, "<", () => MoveMonth(-1));
-            var month = Label(navigation, calendarMonth.ToString("MMMM yyyy"), 25, 80);
+            var month = Label(navigation, DisplayDate(calendarMonth, "MMMM yyyy"), 25, 80);
             month.alignment = TextAnchor.MiddleCenter;
             month.GetComponent<LayoutElement>().preferredWidth = 300;
             MakeButton(navigation, ">", () => MoveMonth(1));
             var weekdays = ActionRow(calendar);
             weekdays.GetComponent<LayoutElement>().preferredHeight = 40;
-            foreach (var day in new[] { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" })
+            foreach (var day in Culture.DateTimeFormat.AbbreviatedDayNames)
             {
                 var label = Label(weekdays, day, 22, 40);
                 label.alignment = TextAnchor.MiddleCenter;
@@ -395,7 +458,7 @@ namespace RememberThis
                     if (date == selectedDate) button.GetComponent<Image>().color = new Color(0.78f, 0.95f, 0.81f);
                 }
             }
-            MakeButton(calendar, "Today", () => SelectDate(DateTime.Today));
+            MakeButton(calendar, T("Today"), () => SelectDate(DateTime.Today));
         }
 
         private void MoveMonth(int delta)
@@ -434,8 +497,7 @@ namespace RememberThis
             var second = now.Ticks / TimeSpan.TicksPerSecond;
             if (second == displayedSecond) return;
             displayedSecond = second;
-            currentClock.text = now.ToString("dddd, MMMM d, yyyy\nh:mm:ss tt",
-                System.Globalization.CultureInfo.InvariantCulture);
+            currentClock.text = DisplayDate(now, "dddd, MMMM d, yyyy\nh:mm:ss tt");
             RefreshUpcoming();
             ShowDueReminder();
             HandleNotificationSnooze();
@@ -461,7 +523,7 @@ namespace RememberThis
                         if (reminder != null)
                         {
                             if (parts[3] == "snooze") Snooze(reminder, DateTime.Now.AddMinutes(10));
-                            else if (parts[3] == "cancel") ChangeReminder(reminder, () => reminder.completed = true, "Alert canceled. Reminder completed.");
+                            else if (parts[3] == "cancel") ChangeReminder(reminder, () => reminder.completed = true, T("Alert canceled. Reminder completed."));
                         }
                     }
                 }
@@ -479,37 +541,37 @@ namespace RememberThis
             text.Append(deleteConfirmId);
             if (listSignature == text.ToString()) return;
             listSignature = text.ToString();
-            foreach (Transform child in reminderList) { child.gameObject.SetActive(false); Destroy(child.gameObject); }
+            ClearUIChildren(reminderList);
             foreach (var group in new[] { "Upcoming", "Past due", "Completed" })
             {
-                Label(reminderList, group, 30, 50);
+                Label(reminderList, T(group), 30, 50);
                 var items = store.reminders.Where(r => !r.deleted && (group == "Completed" ? r.completed :
                     !r.completed && (group == "Upcoming" ? r.utcTicks > DateTime.UtcNow.Ticks : r.utcTicks <= DateTime.UtcNow.Ticks)))
                     .OrderBy(r => r.utcTicks).ThenBy(r => r.id).ToArray();
-                if (items.Length == 0) Label(reminderList, "None", 24, 40);
+                if (items.Length == 0) Label(reminderList, T("None"), 24, 40);
                 foreach (var r in items)
                 {
-                    Label(reminderList, r.text + "\n" + r.LocalTime.ToString("MMM d, h:mm:ss tt"), 25, -1);
+                    Label(reminderList, r.text + "\n" + DisplayDate(r.LocalTime, "MMM d, h:mm:ss tt"), 25, -1);
                     if (!r.completed)
                     {
                         var row = ActionRow(reminderList);
-                        MakeButton(row, "Edit", () => BeginEdit(r));
-                        MakeButton(row, "Complete", () => ChangeReminder(r, () => r.completed = true, "Reminder completed."));
-                        Label(reminderList, "Snooze", 25, 40);
+                        MakeButton(row, T("Edit"), () => BeginEdit(r));
+                        MakeButton(row, T("Complete"), () => ChangeReminder(r, () => r.completed = true, T("Reminder completed.")));
+                        Label(reminderList, T("Snooze"), 25, 40);
                         var snooze = ActionRow(reminderList);
                         MakeButton(snooze, "+10 min", () => Snooze(r, DateTime.Now.AddMinutes(10)));
-                        MakeButton(snooze, "+1 hour", () => Snooze(r, DateTime.Now.AddHours(1)));
-                        MakeButton(snooze, "Tomorrow", () => Snooze(r, DateTime.Now.AddDays(1)));
-                        MakeButton(reminderList, "Custom...", () => BeginCustomSnooze(r));
+                        MakeButton(snooze, T("+1 hour"), () => Snooze(r, DateTime.Now.AddHours(1)));
+                        MakeButton(snooze, T("Tomorrow"), () => Snooze(r, DateTime.Now.AddDays(1)));
+                        MakeButton(reminderList, T("Custom..."), () => BeginCustomSnooze(r));
                     }
                     if (deleteConfirmId == r.id)
                     {
-                        Label(reminderList, "Delete this reminder?", 25, 45);
+                        Label(reminderList, T("Delete this reminder?"), 25, 45);
                         var row = ActionRow(reminderList);
-                        MakeButton(row, "Delete", () => ChangeReminder(r, () => r.deleted = true, "Reminder deleted."));
-                        MakeButton(row, "Keep", () => { deleteConfirmId = 0; RefreshUpcoming(); });
+                        MakeButton(row, T("Delete"), () => ChangeReminder(r, () => r.deleted = true, T("Reminder deleted.")));
+                        MakeButton(row, T("Keep"), () => { deleteConfirmId = 0; RefreshUpcoming(); });
                     }
-                    else MakeButton(reminderList, "Delete...", () => { if (busy) return; deleteConfirmId = r.id; RefreshUpcoming(); });
+                    else MakeButton(reminderList, T("Delete..."), () => { if (busy) return; deleteConfirmId = r.id; RefreshUpcoming(); });
                 }
             }
         }
@@ -531,7 +593,7 @@ namespace RememberThis
             ShowPage("edit");
             customSnooze = false;
             reminderInput.interactable = true;
-            cancelEdit.GetComponentInChildren<Text>().text = "Cancel editing";
+            cancelEdit.GetComponentInChildren<Text>().text = T("Cancel editing");
             editingId = reminder.id;
             reminderInput.text = reminder.text;
             isPm = reminder.LocalTime.Hour >= 12;
@@ -542,10 +604,10 @@ namespace RememberThis
             calendarMonth = new DateTime(selectedDate.Year, selectedDate.Month, 1);
             ShowCalendar();
             validTime = true;
-            chosenTime.text = "Editing: " + selectedTime.ToString("MMM d, h:mm:ss tt");
-            schedule.GetComponentInChildren<Text>().text = "Save changes";
+            chosenTime.text = T("Editing: ") + DisplayDate(selectedTime, "MMM d, h:mm:ss tt");
+            schedule.GetComponentInChildren<Text>().text = T("Save changes");
             cancelEdit.gameObject.SetActive(true);
-            status.text = "Edit the text or time, then save. Past reminders need a future time.";
+            status.text = T("Edit the text or time, then save. Past reminders need a future time.");
             pageScroll.verticalNormalizedPosition = 1;
         }
 
@@ -563,9 +625,9 @@ namespace RememberThis
             periodLabel.text = isPm ? "PM" : "AM";
             timeInput.SetTextWithoutNotify(initial.ToString("h:mm:ss", System.Globalization.CultureInfo.InvariantCulture));
             UpdateChosenTime(timeInput.text);
-            schedule.GetComponentInChildren<Text>().text = "Confirm snooze";
-            cancelEdit.GetComponentInChildren<Text>().text = "Cancel snooze";
-            status.text = "Choose a new time and AM or PM, then confirm snooze. The original reminder stays unchanged until you confirm.";
+            schedule.GetComponentInChildren<Text>().text = T("Confirm snooze");
+            cancelEdit.GetComponentInChildren<Text>().text = T("Cancel snooze");
+            status.text = T("Choose a new time and AM or PM, then confirm snooze. The original reminder stays unchanged until you confirm.");
         }
 
         private void EndEdit()
@@ -573,12 +635,12 @@ namespace RememberThis
             editingId = 0;
             customSnooze = false;
             reminderInput.interactable = true;
-            schedule.GetComponentInChildren<Text>().text = "Set reminder";
+            schedule.GetComponentInChildren<Text>().text = T("Set reminder");
             cancelEdit.gameObject.SetActive(false);
         }
 
         private void Snooze(SavedReminder r, DateTime due) =>
-            ChangeReminder(r, () => { r.utcTicks = due.ToUniversalTime().Ticks; r.completed = false; }, "Snoozed until " + due.ToString("MMM d, h:mm:ss tt"));
+            ChangeReminder(r, () => { r.utcTicks = due.ToUniversalTime().Ticks; r.completed = false; }, T("Snoozed until ") + DisplayDate(due, "MMM d, h:mm:ss tt"));
 
         private void ChangeReminder(SavedReminder r, Action change, string message)
         {
@@ -606,7 +668,7 @@ namespace RememberThis
                 AndroidNotificationCenter.CancelNotification(r.id);
                 if (!r.deleted && !r.completed && r.utcTicks > DateTime.UtcNow.Ticks) SendReminder(r);
             }
-            catch (Exception e) { throw new InvalidOperationException("Change saved, but the phone notification could not be updated. Reopen the app to retry.", e); }
+            catch (Exception e) { throw new InvalidOperationException(T("Change saved, but the phone notification could not be updated. Reopen the app to retry."), e); }
 #endif
         }
 
@@ -616,12 +678,12 @@ namespace RememberThis
                 System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var parsed);
             if (!validTime)
             {
-                chosenTime.text = "Enter a time from 1 to 12, like 7:30 or 7:30:15, and choose AM or PM.";
+                chosenTime.text = T("Enter a time from 1 to 12, like 7:30 or 7:30:15, and choose AM or PM.");
                 return;
             }
             selectedTime = selectedDate.Add(parsed.TimeOfDay);
-            chosenTime.text = "Remind me: " + selectedTime.ToString("ddd, MMM d, yyyy 'at' h:mm:ss tt")
-                + (selectedTime <= DateTime.Now ? "\nChoose a future date and time." : "");
+            chosenTime.text = T("Remind me: ") + DisplayDate(selectedTime, "ddd, MMM d, yyyy 'at' h:mm:ss tt")
+                + (selectedTime <= DateTime.Now ? T("\nChoose a future date and time.") : "");
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -633,6 +695,9 @@ namespace RememberThis
 
         private void Start()
         {
+            try { languageChoice = ReminderLanguagePreference.Load(); }
+            catch (Exception e) { Debug.LogException(e); languageChoice = "auto"; }
+            ConfigureChoice(languageChoice, Application.systemLanguage == SystemLanguage.Spanish ? "es" : "en");
             BuildUI();
             storePath = Path.Combine(Application.persistentDataPath, "reminders.json");
             try { store = ReminderStore.Load(storePath); RefreshUpcoming(); }
@@ -640,20 +705,16 @@ namespace RememberThis
 #if UNITY_ANDROID && !UNITY_EDITOR
             try
             {
-                AndroidNotificationCenter.RegisterNotificationChannel(new AndroidNotificationChannel
-                {
-                    Id = Channel, Name = "Reminder tests", Importance = Importance.High,
-                    Description = "Reminders at your chosen time"
-                });
+                RegisterChannel();
                 // Stable IDs avoid duplicate alerts when reopening the app.
                 foreach (var reminder in store.reminders)
                     if (reminder.deleted || reminder.completed || reminder.utcTicks > DateTime.UtcNow.Ticks)
                         SyncReminder(reminder);
-                status.text = "Ready. Allow notifications when asked, then leave the app to test delivery.";
+                status.text = T("Ready. Allow notifications when asked, then leave the app to test delivery.");
             }
             catch (Exception e) { ShowError(e); }
 #else
-            status.text = "Editor preview only. Build and run on an Android phone to test real notifications.";
+            status.text = T("Editor preview only. Build and run on an Android phone to test real notifications.");
 #endif
         }
 
@@ -664,12 +725,12 @@ namespace RememberThis
             var reminderText = reminderInput.text.Trim();
             if (string.IsNullOrWhiteSpace(reminderText))
             {
-                status.text = "Enter what you want to remember, such as Call John.";
+                status.text = T("Enter what you want to remember, such as Call John.");
                 yield break;
             }
             if (!validTime || selectedTime <= DateTime.Now)
             {
-                status.text = "Enter a valid future time before setting the reminder.";
+                status.text = T("Enter a valid future time before setting the reminder.");
                 yield break;
             }
             var due = selectedTime;
@@ -680,7 +741,7 @@ namespace RememberThis
             try
             {
 #if UNITY_ANDROID && !UNITY_EDITOR
-                status.text = "Waiting for notification permission...";
+                status.text = T("Waiting for notification permission...");
                 PermissionRequest request = null;
                 try { request = new PermissionRequest(); }
                 catch (Exception e) { ShowError(e); }
@@ -688,28 +749,28 @@ namespace RememberThis
                 while (request.Status == PermissionStatus.RequestPending) yield return null;
                 if (request.Status != PermissionStatus.Allowed)
                 {
-                    status.text = "Notifications are disabled. Enable them in Android Settings > Apps > Remember This > Notifications, then try again.";
+                    status.text = T("Notifications are disabled. Enable them in Android Settings > Apps > Remember This > Notifications, then try again.");
                     yield break;
                 }
                 try
                 {
                     if (due <= DateTime.Now)
                     {
-                        status.text = "That time passed while waiting for permission. Choose a new time.";
+                        status.text = T("That time passed while waiting for permission. Choose a new time.");
                         yield break;
                     }
                     SaveReminder(reminderText, due);
                     lastSaveSucceeded = true;
-                    status.text = "Reminder set for " + due.ToString("MMM d, h:mm:ss tt") + ".\nLeave the app and watch for the notification.\n"
+                    status.text = T("Reminder set for ") + DisplayDate(due, "MMM d, h:mm:ss tt") + T(".\nLeave the app and watch for the notification.\n")
                         + (AndroidNotificationCenter.UsingExactScheduling
-                            ? "Exact scheduling is available. Delivery still needs a phone test."
-                            : "Android is using approximate timing; delivery may be delayed. Enable exact timing below, then schedule again.");
+                            ? T("Exact scheduling is available. Delivery still needs a phone test.")
+                            : T("Android is using approximate timing; delivery may be delayed. Enable exact timing below, then schedule again."));
                 }
                 catch (Exception e) { ShowError(e); }
 #else
                 try { SaveReminder(reminderText, due); lastSaveSucceeded = true; }
                 catch (Exception e) { ShowError(e); yield break; }
-                status.text = "Preview: " + reminderText + "\nFor " + due.ToString("MMM d, h:mm:ss tt") + ". No notification was scheduled on this device.";
+                status.text = T("Preview: ") + reminderText + T("\nFor ") + DisplayDate(due, "MMM d, h:mm:ss tt") + T(". No notification was scheduled on this device.");
                 yield return null;
 #endif
             }
@@ -739,12 +800,21 @@ namespace RememberThis
 #if UNITY_ANDROID && !UNITY_EDITOR
             // Persist first: if scheduling fails, reopening can retry this saved reminder.
             try { SendReminder(reminder); }
-            catch (Exception e) { throw new InvalidOperationException("Reminder saved, but notification scheduling failed. Reopen the app to retry.", e); }
+            catch (Exception e) { throw new InvalidOperationException(T("Reminder saved, but notification scheduling failed. Reopen the app to retry."), e); }
 #endif
             RefreshUpcoming();
         }
 
 #if UNITY_ANDROID && !UNITY_EDITOR
+        private static void RegisterChannel()
+        {
+            AndroidNotificationCenter.RegisterNotificationChannel(new AndroidNotificationChannel
+            {
+                Id = Channel, Name = T("Reminder tests"), Importance = Importance.High,
+                Description = T("Reminders at your chosen time")
+            });
+        }
+
         private static void SendReminder(SavedReminder reminder)
         {
             AndroidNotificationCenter.SendNotificationWithExplicitID(new AndroidNotification
@@ -761,9 +831,9 @@ namespace RememberThis
             try
             {
                 var reminder = store.reminders.Where(r => !r.deleted && !r.completed).OrderByDescending(r => r.id).FirstOrDefault();
-                if (reminder == null) { status.text = "No saved reminder to cancel."; return; }
+                if (reminder == null) { status.text = T("No saved reminder to cancel."); return; }
                 deleteConfirmId = reminder.id;
-                status.text = "Confirm deletion in the reminder list below.";
+                status.text = T("Confirm deletion in the reminder list below.");
                 RefreshUpcoming();
             }
             catch (Exception e) { ShowError(e); }
@@ -776,14 +846,14 @@ namespace RememberThis
             {
 #if UNITY_ANDROID && !UNITY_EDITOR
                 if (AndroidNotificationCenter.UsingExactScheduling)
-                    status.text = "Exact timing is already available. Tap Notify me to start a new test.";
+                    status.text = T("Exact timing is already available. Tap Notify me to start a new test.");
                 else
                 {
                     AndroidNotificationCenter.RequestExactScheduling();
-                    status.text = "Allow alarms and reminders in Android settings, return here, then schedule a new test.";
+                    status.text = T("Allow alarms and reminders in Android settings, return here, then schedule a new test.");
                 }
 #else
-                status.text = "Exact timing permissions can only be tested on an Android phone.";
+                status.text = T("Exact timing permissions can only be tested on an Android phone.");
 #endif
             }
             catch (Exception e) { ShowError(e); }
@@ -792,7 +862,7 @@ namespace RememberThis
         private void ShowError(Exception e)
         {
             Debug.LogException(e);
-            status.text = "The notification operation failed. Please try again.\n" + e.Message;
+            status.text = T("The notification operation failed. Please try again.\n") + e.Message;
         }
 
         private void BuildUI()
@@ -842,24 +912,37 @@ namespace RememberThis
 
             Label(panel.transform, "REMEMBER THIS", 40, 55);
             currentClock = Label(panel.transform, "", 26, 75);
-            Update();
-            backHome = MakeButton(panel.transform, "Back to home", () => ShowPage("home"));
+            currentClock.text = DisplayDate(DateTime.Now, "dddd, MMMM d, yyyy\nh:mm:ss tt");
+            backHome = MakeButton(panel.transform, T("Back to home"), () => ShowPage("home"));
             homeSection = MakeSection(panel.transform, "Home");
-            Label(homeSection.transform, "What would you like to do?", 30, 60);
-            MakeButton(homeSection.transform, "Speak reminder", () => OpenVoiceDialog(false));
-            MakeButton(homeSection.transform, "Calendar", ViewCalendar);
-            MakeButton(homeSection.transform, "My reminders", () => ShowPage("saved"));
-            Label(homeSection.transform, "Speak to create a reminder, choose a date, or manage saved reminders.", 26, 120);
+            Label(homeSection.transform, T("What would you like to do?"), 30, 60);
+            MakeButton(homeSection.transform, T("Speak reminder"), () => OpenVoiceDialog(false));
+            MakeButton(homeSection.transform, T("Calendar"), ViewCalendar);
+            MakeButton(homeSection.transform, T("My reminders"), () => ShowPage("saved"));
+            Label(homeSection.transform, T("Speak to create a reminder, choose a date, or manage saved reminders."), 26, 120);
+            Label(homeSection.transform, "Language / Idioma", 26, 45);
+            var languages = ActionRow(homeSection.transform);
+            foreach (var choice in new[] { "auto", "en", "es" })
+            {
+                var label = choice == "auto" ? T("Automatic") : choice == "en" ? "English" : "Español";
+                var button = MakeButton(languages, label, () => SelectLanguage(choice));
+                button.name = "Language " + choice;
+                var element = button.GetComponent<LayoutElement>();
+                element.preferredWidth = 0;
+                element.flexibleWidth = 1;
+                button.interactable = choice != languageChoice;
+                if (choice == languageChoice) button.GetComponent<Image>().color = new Color(0.78f, 0.95f, 0.81f);
+            }
             editSection = MakeSection(panel.transform, "Edit reminder");
             calendarSection = MakeSection(panel.transform, "Calendar page");
             formActions = MakeSection(panel.transform, "Save reminder");
             savedSection = MakeSection(panel.transform, "My reminders");
-            Label(editSection.transform, "What do you want to remember?", 28, 45);
+            Label(editSection.transform, T("What do you want to remember?"), 28, 45);
             reminderInput = MakeTimeInput(editSection.transform);
             reminderInput.gameObject.name = "Reminder text";
             reminderInput.characterLimit = 120;
             reminderInput.textComponent.fontSize = 30;
-            var placeholder = Label(reminderInput.transform, "Example: Call John", 27, 85);
+            var placeholder = Label(reminderInput.transform, T("Example: Call John"), 27, 85);
             placeholder.alignment = TextAnchor.MiddleLeft;
             placeholder.color = new Color(0.75f, 0.8f, 0.85f);
             placeholder.raycastTarget = false;
@@ -868,24 +951,24 @@ namespace RememberThis
             placeholder.rectTransform.offsetMin = new Vector2(20, 0);
             placeholder.rectTransform.offsetMax = new Vector2(-20, 0);
             reminderInput.placeholder = placeholder;
-            MakeButton(editSection.transform, "Menu: calendar / speak / review", OpenReminderMenu);
-            voiceButton = MakeButton(editSection.transform, "Speak reminder", () => OpenVoiceDialog(false));
-            cancelVoice = MakeButton(editSection.transform, "Cancel voice entry", () => offlineVoice.Cancel());
+            MakeButton(editSection.transform, T("Menu: calendar / speak / review"), OpenReminderMenu);
+            voiceButton = MakeButton(editSection.transform, T("Speak reminder"), () => OpenVoiceDialog(false));
+            cancelVoice = MakeButton(editSection.transform, T("Cancel voice entry"), () => offlineVoice.Cancel());
             cancelVoice.gameObject.SetActive(false);
-            voiceStatus = Label(editSection.transform, "Tap Speak reminder, say what and when, then pause. Review before saving.", 24, -1);
-            Label(editSection.transform, "When? Say or type: in an hour, in 10 minutes, or tomorrow at 3 PM.", 22, 85);
+            voiceStatus = Label(editSection.transform, T("Tap Speak reminder, say what and when, then pause. Review before saving."), 24, -1);
+            Label(editSection.transform, T("When? Say or type: in an hour, in 10 minutes, or tomorrow at 3 PM."), 22, 85);
             whenInput = MakeTimeInput(editSection.transform);
             whenInput.characterLimit = 120;
             whenInput.textComponent.fontSize = 30;
             whenInput.onEndEdit.AddListener(value => { if (!busy && !string.IsNullOrWhiteSpace(value)) ApplyWhen(value, DateTime.Now); });
-            timeVoiceButton = MakeButton(editSection.transform, "Speak when", () => OpenVoiceDialog(true));
+            timeVoiceButton = MakeButton(editSection.transform, T("Speak when"), () => OpenVoiceDialog(true));
             Text licenses = null;
-            MakeButton(editSection.transform, "Open-source licenses", () => licenses.gameObject.SetActive(!licenses.gameObject.activeSelf));
+            MakeButton(editSection.transform, T("Open-source licenses"), () => licenses.gameObject.SetActive(!licenses.gameObject.activeSelf));
             licenses = Label(editSection.transform, string.Join("\n\n", new[] { "WhisperLicense", "WhisperCppLicense", "WhisperModelLicense" }
                 .Select(name => Resources.Load<TextAsset>(name)?.text ?? name)), 18, -1);
             licenses.gameObject.SetActive(false);
-            Label(calendarSection.transform, "Choose a day, then a time from 1 to 12 and AM or PM. Selected day is green.", 25, 90);
-            returnToVoice = MakeButton(calendarSection.transform, "Return to menu / confirm", OpenReminderMenu);
+            Label(calendarSection.transform, T("Choose a day, then a time from 1 to 12 and AM or PM. Selected day is green."), 25, 90);
+            returnToVoice = MakeButton(calendarSection.transform, T("Return to menu / confirm"), OpenReminderMenu);
             returnToVoice.gameObject.SetActive(false);
             var calendarObject = new GameObject("Calendar", typeof(RectTransform), typeof(VerticalLayoutGroup));
             calendarObject.transform.SetParent(calendarSection.transform, false);
@@ -919,15 +1002,15 @@ namespace RememberThis
             chosenTime = Label(calendarSection.transform, "", 25, 85);
             timeInput.onValueChanged.AddListener(UpdateChosenTime);
             timeInput.text = initialTime.ToString("h:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
-            MakeButton(formActions.transform, "Edit reminder text / time", () => ShowPage("edit"));
-            MakeButton(formActions.transform, "Review and confirm", OpenReminderMenu);
-            schedule = MakeButton(formActions.transform, "Set reminder", () => StartCoroutine(Schedule()));
-            cancelEdit = MakeButton(formActions.transform, "Cancel editing", () => { if (!busy) { EndEdit(); status.text = "Editing canceled. Saved reminder unchanged."; } });
+            MakeButton(formActions.transform, T("Edit reminder text / time"), () => ShowPage("edit"));
+            MakeButton(formActions.transform, T("Review and confirm"), OpenReminderMenu);
+            schedule = MakeButton(formActions.transform, T("Set reminder"), () => StartCoroutine(Schedule()));
+            cancelEdit = MakeButton(formActions.transform, T("Cancel editing"), () => { if (!busy) { EndEdit(); status.text = T("Editing canceled. Saved reminder unchanged."); } });
             cancelEdit.gameObject.SetActive(false);
-            MakeButton(savedSection.transform, "Enable exact timing", RequestExactTiming);
-            MakeButton(savedSection.transform, "Cancel most recent reminder", Cancel);
-            status = Label(panel.transform, "Starting...", 25, 190);
-            Label(savedSection.transform, "Upcoming reminders — scroll to see all", 28, 75);
+            MakeButton(savedSection.transform, T("Enable exact timing"), RequestExactTiming);
+            MakeButton(savedSection.transform, T("Cancel most recent reminder"), Cancel);
+            status = Label(panel.transform, T("Starting..."), 25, 190);
+            Label(savedSection.transform, T("Upcoming reminders — scroll to see all"), 28, 75);
             var list = new GameObject("Reminder cards", typeof(RectTransform), typeof(VerticalLayoutGroup));
             list.transform.SetParent(savedSection.transform, false);
             var listLayout = list.GetComponent<VerticalLayoutGroup>();
@@ -935,7 +1018,7 @@ namespace RememberThis
             listLayout.childControlWidth = listLayout.childControlHeight = true;
             listLayout.childForceExpandHeight = false;
             reminderList = list.transform;
-            Label(savedSection.transform, "Snooze starts from now. Tomorrow means this time tomorrow. Past due does not confirm notification delivery.", 22, 95);
+            Label(savedSection.transform, T("Snooze starts from now. Tomorrow means this time tomorrow. Past due does not confirm notification delivery."), 22, 95);
             BuildVoiceDialog(canvasObject.transform);
             ShowPage("home");
         }
@@ -959,14 +1042,14 @@ namespace RememberThis
             layout.childForceExpandHeight = false;
             voicePrompt = Label(box.transform, "", 34, 100);
             voiceHeard = Label(box.transform, "", 26, 230);
-            MakeButton(box.transform, "View calendar", ViewCalendar);
-            dialogRecord = MakeButton(box.transform, "Speak reminder", RecordDialogAnswer);
-            voiceNext = MakeButton(box.transform, "Review and confirm", () =>
+            MakeButton(box.transform, T("View calendar"), ViewCalendar);
+            dialogRecord = MakeButton(box.transform, T("Speak reminder"), RecordDialogAnswer);
+            voiceNext = MakeButton(box.transform, T("Review and confirm"), () =>
             {
                 if (busy) return;
                 OpenReminderMenu();
             });
-            MakeButton(box.transform, "Cancel voice / close", () =>
+            MakeButton(box.transform, T("Cancel voice / close"), () =>
             {
                 if (voicePending) offlineVoice.Cancel();
                 voiceDialog.SetActive(false);
@@ -987,32 +1070,32 @@ namespace RememberThis
             menuLayout.spacing = 16;
             menuLayout.childControlWidth = menuLayout.childControlHeight = true;
             menuLayout.childForceExpandHeight = false;
-            Label(menuBox.transform, "Review your reminder", 34, 65);
+            Label(menuBox.transform, T("Review your reminder"), 34, 65);
             menuPreview = Label(menuBox.transform, "", 23, 250);
-            Label(menuBox.transform, "Ready? Choose one:", 26, 45);
-            var confirm = MakeButton(menuBox.transform, "Confirm reminder — save it", () => StartCoroutine(ConfirmFromMenu()));
+            Label(menuBox.transform, T("Ready? Choose one:"), 26, 45);
+            var confirm = MakeButton(menuBox.transform, T("Confirm reminder — save it"), () => StartCoroutine(ConfirmFromMenu()));
             confirm.GetComponent<Image>().color = new Color(0.78f, 0.95f, 0.81f);
             confirm.GetComponentInChildren<Text>().fontStyle = FontStyle.Bold;
             confirm.GetComponent<LayoutElement>().preferredHeight = 94;
-            var cancel = MakeButton(menuBox.transform, "Cancel reminder — discard draft", () =>
+            var cancel = MakeButton(menuBox.transform, T("Cancel reminder — discard draft"), () =>
             {
                 if (busy) return;
                 EndEdit();
                 reminderInput.text = "";
                 whenInput.SetTextWithoutNotify("");
                 timeInput.text = "";
-                voiceStatus.text = "Draft canceled. Speak or type a new reminder.";
+                voiceStatus.text = T("Draft canceled. Speak or type a new reminder.");
                 reminderMenu.SetActive(false);
                 returnToVoice.gameObject.SetActive(false);
-                status.text = "Draft canceled. Previously saved reminders are unchanged.";
+                status.text = T("Draft canceled. Previously saved reminders are unchanged.");
             });
             cancel.GetComponent<Image>().color = new Color(1f, 0.82f, 0.80f);
             cancel.GetComponentInChildren<Text>().fontStyle = FontStyle.Bold;
             cancel.GetComponent<LayoutElement>().preferredHeight = 94;
-            Label(menuBox.transform, "Need a change? Edit, check a date, or speak again:", 24, 60);
-            MakeButton(menuBox.transform, "View calendar", ViewCalendar);
-            MakeButton(menuBox.transform, "Speak reminder", () => OpenVoiceDialog(false));
-            MakeButton(menuBox.transform, "Edit text / date / time", () =>
+            Label(menuBox.transform, T("Need a change? Edit, check a date, or speak again:"), 24, 60);
+            MakeButton(menuBox.transform, T("View calendar"), ViewCalendar);
+            MakeButton(menuBox.transform, T("Speak reminder"), () => OpenVoiceDialog(false));
+            MakeButton(menuBox.transform, T("Edit text / date / time"), () =>
             {
                 if (busy) return;
                 reminderMenu.SetActive(false);
@@ -1021,7 +1104,7 @@ namespace RememberThis
                 ShowPage("edit");
                 reminderInput.ActivateInputField();
             });
-            MakeButton(menuBox.transform, "Check notification status", CheckNotificationStatus);
+            MakeButton(menuBox.transform, T("Check notification status"), CheckNotificationStatus);
             reminderMenu.SetActive(false);
             BuildDueDialog(canvas);
         }
@@ -1045,7 +1128,7 @@ namespace RememberThis
             layout.spacing = 24;
             layout.childControlWidth = layout.childControlHeight = true;
             layout.childForceExpandHeight = false;
-            var heading = Label(box.transform, "IT'S TIME", 48, 90);
+            var heading = Label(box.transform, T("IT'S TIME"), 48, 90);
             heading.color = new Color(0.35f, 0.18f, 0.02f);
             heading.fontStyle = FontStyle.Bold;
             heading.alignment = TextAnchor.MiddleCenter;
@@ -1053,19 +1136,19 @@ namespace RememberThis
             dueMessage.color = new Color(0.12f, 0.16f, 0.20f);
             dueMessage.alignment = TextAnchor.MiddleCenter;
             var shortSnooze = ActionRow(box.transform);
-            MakeButton(shortSnooze, "Snooze 5 min", () => RespondToDueReminder(5));
-            MakeButton(shortSnooze, "Snooze 10 min", () => RespondToDueReminder(10));
+            MakeButton(shortSnooze, T("Snooze 5 min"), () => RespondToDueReminder(5));
+            MakeButton(shortSnooze, T("Snooze 10 min"), () => RespondToDueReminder(10));
             var longSnooze = ActionRow(box.transform);
-            MakeButton(longSnooze, "Snooze 1 hour", () => RespondToDueReminder(60));
-            MakeButton(longSnooze, "Tomorrow", () => RespondToDueReminder(1440));
-            MakeButton(box.transform, "Custom snooze…", () =>
+            MakeButton(longSnooze, T("Snooze 1 hour"), () => RespondToDueReminder(60));
+            MakeButton(longSnooze, T("Tomorrow"), () => RespondToDueReminder(1440));
+            MakeButton(box.transform, T("Custom snooze…"), () =>
             {
                 if (busy || visibleDueReminder == null) return;
                 if (reminderAudio != null) reminderAudio.Stop();
                 BeginCustomSnooze(visibleDueReminder);
                 dueDialog.SetActive(false);
             });
-            var cancelButton = MakeButton(box.transform, "Cancel reminder", () => RespondToDueReminder(0));
+            var cancelButton = MakeButton(box.transform, T("Cancel reminder"), () => RespondToDueReminder(0));
             cancelButton.GetComponent<Image>().color = new Color(1f, 0.82f, 0.80f);
             cancelButton.GetComponent<LayoutElement>().preferredHeight = 80;
             dueDialog.SetActive(false);

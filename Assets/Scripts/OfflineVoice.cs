@@ -1,4 +1,5 @@
 using System;
+using static RememberThis.ReminderLocalization;
 using System.Collections;
 using System.IO;
 using UnityEngine;
@@ -33,14 +34,14 @@ namespace RememberThis
             if (elapsed == lastDisplayedSecond) return;
             lastDisplayedSecond = elapsed;
             var percent = System.Threading.Volatile.Read(ref inferencePercent);
-            Progress?.Invoke((canceled ? "Canceling…" : loading ? "Getting voice ready" : "Preparing your reminder: " + percent + "%")
-                + " — " + elapsed + " seconds."
-                + (elapsed >= 30 ? "\nThis is taking longer than usual. You can cancel and type instead." : ""));
+            Progress?.Invoke((canceled ? T("Canceling…") : loading ? T("Getting voice ready") : T("Preparing your reminder: ") + percent + "%")
+                + " — " + elapsed + T(" seconds.")
+                + (elapsed >= 30 ? T("\nThis is taking longer than usual. You can cancel and type instead.") : ""));
         }
 
         private IEnumerator Capture()
         {
-            Progress?.Invoke("Allow microphone access when prompted.");
+            Progress?.Invoke(T("Allow microphone access when prompted."));
 #if UNITY_ANDROID && !UNITY_EDITOR
             if (!UnityEngine.Android.Permission.HasUserAuthorizedPermission(UnityEngine.Android.Permission.Microphone))
             {
@@ -57,14 +58,14 @@ namespace RememberThis
             yield return Application.RequestUserAuthorization(UserAuthorization.Microphone);
             bool allowed = Application.HasUserAuthorization(UserAuthorization.Microphone);
 #endif
-            if (canceled) { Finish(null, "Recording canceled. Your text is unchanged."); yield break; }
-            if (!allowed) { Finish(null, "Microphone permission is off. Enable it in device settings or type your reminder."); yield break; }
-            if (Microphone.devices.Length == 0) { Finish(null, "No microphone detected. Check your device or BlueStacks microphone settings."); yield break; }
+            if (canceled) { Finish(null, T("Recording canceled. Your text is unchanged.")); yield break; }
+            if (!allowed) { Finish(null, T("Microphone permission is off. Enable it in device settings or type your reminder.")); yield break; }
+            if (Microphone.devices.Length == 0) { Finish(null, T("No microphone detected. Check your device or BlueStacks microphone settings.")); yield break; }
             try { recording = Microphone.Start(null, false, 20, 16000); }
             catch (Exception e) { Debug.LogWarning("Could not start microphone: " + e.Message); }
-            if (recording == null) { Finish(null, "Microphone could not start."); yield break; }
+            if (recording == null) { Finish(null, T("Microphone could not start.")); yield break; }
             IsRecording = true;
-            Progress?.Invoke("Listening… Say your reminder, then pause. Or tap Done speaking.");
+            Progress?.Invoke(T("Listening… Say your reminder, then pause. Or tap Done speaking."));
             var started = Time.realtimeSinceStartup;
             var pause = new SpeechPauseDetector();
             int analyzed = 0;
@@ -84,8 +85,8 @@ namespace RememberThis
             int count = Microphone.GetPosition(null);
             Microphone.End(null);
             IsRecording = false;
-            if (canceled) { Release(); Finish(null, "Recording canceled. Your text is unchanged."); yield break; }
-            if (count < 1600) { Release(); Finish(null, "No usable audio captured. Check your microphone and try again."); yield break; }
+            if (canceled) { Release(); Finish(null, T("Recording canceled. Your text is unchanged.")); yield break; }
+            if (count < 1600) { Release(); Finish(null, T("No usable audio captured. Check your microphone and try again.")); yield break; }
             var all = new float[recording.samples * recording.channels];
             int frequency = recording.frequency;
             int channels = recording.channels;
@@ -95,7 +96,7 @@ namespace RememberThis
             Array.Copy(all, samples, samples.Length);
             float peak = 0;
             foreach (float sample in samples) peak = Mathf.Max(peak, Mathf.Abs(sample));
-            if (!read || peak < 0.005f) { Finish(null, "The recording was silent. Check microphone input and try again."); yield break; }
+            if (!read || peak < 0.005f) { Finish(null, T("The recording was silent. Check microphone input and try again.")); yield break; }
             Transcribe(samples, frequency, channels);
         }
 
@@ -111,28 +112,28 @@ namespace RememberThis
                 if (model == null)
                 {
                     loading = true;
-                    Progress?.Invoke("Getting voice ready for the first time…");
+                    Progress?.Invoke(T("Getting voice ready for the first time…"));
                     var context = WhisperContextParams.GetDefaultParams();
                     context.UseGpu = false;
                     model = await WhisperWrapper.InitFromFileAsync(Path.Combine(Application.streamingAssetsPath, "Whisper/ggml-tiny.bin"), context);
-                    if (model == null) throw new InvalidOperationException("Speech model failed to load. Restore Whisper dependencies and rebuild.");
+                    if (model == null) throw new InvalidOperationException(T("Speech model failed to load. Restore Whisper dependencies and rebuild."));
                     model.OnProgress += value => System.Threading.Volatile.Write(ref inferencePercent, value);
                 }
                 loading = false;
-                if (!this || canceled) { Finish(null, "Voice entry canceled. Your text is unchanged."); return; }
-                Progress?.Invoke("Preparing your reminder…");
+                if (!this || canceled) { Finish(null, T("Voice entry canceled. Your text is unchanged.")); return; }
+                Progress?.Invoke(T("Preparing your reminder…"));
                 var settings = WhisperParams.GetDefaultParams();
-                settings.Language = "en";
+                settings.Language = Language;
                 settings.Translate = false;
                 settings.NoContext = true;
                 settings.ThreadsCount = Mathf.Clamp(SystemInfo.processorCount, 1, 4);
                 var result = await model.GetTextAsync(samples, frequency, channels, settings);
                 if (!this) return;
-                if (canceled) Finish(null, "Voice entry canceled. Your text is unchanged.");
-                else if (string.IsNullOrWhiteSpace(result?.Result)) Finish(null, "No words recognized. Try again or type the reminder.");
+                if (canceled) Finish(null, T("Voice entry canceled. Your text is unchanged."));
+                else if (string.IsNullOrWhiteSpace(result?.Result)) Finish(null, T("No words recognized. Try again or type the reminder."));
                 else Finish(result.Result.Trim(), null);
             }
-            catch (Exception e) { if (this) Finish(null, "Offline voice failed: " + e.Message); }
+            catch (Exception e) { if (this) Finish(null, T("Offline voice failed: ") + e.Message); }
             finally { processing = false; loading = false; }
         }
 

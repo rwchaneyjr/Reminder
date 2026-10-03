@@ -47,12 +47,14 @@ namespace RememberThis.Editor
             if (!File.Exists("user.keystore") || PlayerSettings.Android.keyaliasName != "rememberthis")
                 throw new BuildFailedException("Expected existing user.keystore and release alias rememberthis.");
             var password = System.Environment.GetEnvironmentVariable("REMEMBERTHIS_SIGNING_PASSWORD");
-            if (string.IsNullOrEmpty(password))
-                throw new BuildFailedException("Provide REMEMBERTHIS_SIGNING_PASSWORD for this build process.");
+            var keystorePassword = string.IsNullOrEmpty(password) ? PlayerSettings.Android.keystorePass : password;
+            var aliasPassword = string.IsNullOrEmpty(password) ? PlayerSettings.Android.keyaliasPass : password;
+            if (string.IsNullOrEmpty(keystorePassword) || string.IsNullOrEmpty(aliasPassword))
+                throw new BuildFailedException("Enter the keystore and alias passwords in Player Settings > Publishing Settings, or provide REMEMBERTHIS_SIGNING_PASSWORD for this build process.");
             PlayerSettings.Android.useCustomKeystore = true;
             PlayerSettings.Android.keystoreName = Path.GetFullPath("user.keystore");
-            PlayerSettings.Android.keystorePass = password;
-            PlayerSettings.Android.keyaliasPass = password;
+            PlayerSettings.Android.keystorePass = keystorePassword;
+            PlayerSettings.Android.keyaliasPass = aliasPassword;
             EditorUserBuildSettings.buildAppBundle = true;
             EditorUserBuildSettings.development = false;
             EditorUserBuildSettings.allowDebugging = false;
